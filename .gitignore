@@ -8,3 +8,5 @@ market_data_cache.db
 *.egg-info/
 dist/
 .DS_Store
+graphify-out/cache/
+graphify-out/.*
