@@ -1,14 +1,17 @@
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import Layout from "../components/layout/Layout";
 import VisualBuilder from "../components/strategy/VisualBuilder";
-import CodeEditor, { DEFAULT_CODE } from "../components/strategy/CodeEditor";
+import { DEFAULT_CODE } from "../components/strategy/codeDefaults";
 import AIGenerator from "../components/strategy/AIGenerator";
 import PositionSizingInput from "../components/strategy/PositionSizingInput";
 import { runBacktest } from "../api/backtest";
 import { saveStrategy } from "../api/strategies";
 import type { PositionSizing, SavedStrategy, StrategyConfig, StrategyRuleSet } from "../types";
+
+// Monaco is a large dependency (~1MB) — only load it when Code mode is actually used.
+const CodeEditor = lazy(() => import("../components/strategy/CodeEditor"));
 
 type Mode = "visual" | "code" | "ai";
 
@@ -134,7 +137,11 @@ export default function StrategyPage() {
         {/* Builder area */}
         <div className="bg-slate-900 rounded-xl border border-slate-800 p-6 mb-6">
           {mode === "visual" && <VisualBuilder value={rules} onChange={setRules} />}
-          {mode === "code" && <CodeEditor value={code} onChange={setCode} />}
+          {mode === "code" && (
+            <Suspense fallback={<div className="text-slate-400 text-sm py-10 text-center">Loading editor…</div>}>
+              <CodeEditor value={code} onChange={setCode} />
+            </Suspense>
+          )}
           {mode === "ai" && <AIGenerator onStrategyGenerated={handleAIGenerated} />}
         </div>
 
