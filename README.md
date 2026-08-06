@@ -7,7 +7,7 @@
 [![TypeScript](https://img.shields.io/badge/language-TypeScript-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/build-Vite_6-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
 [![Claude API](https://img.shields.io/badge/AI-Claude_API-D97757?logo=anthropic&logoColor=white)](https://www.anthropic.com/api)
-[![Tests](https://img.shields.io/badge/tests-78_passing-brightgreen)](#testing)
+[![Tests](https://img.shields.io/badge/tests-91_passing-brightgreen)](#testing)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
 ---
@@ -93,7 +93,7 @@ BacktestIQ/
 │   │                          signal generation, portfolio simulation,
 │   │                          metrics, AI generation, PDF export
 │   ├── models/                User, Strategy, StrategyVersion, BacktestRun (SQLAlchemy)
-│   ├── tests/                  73 pytest tests: unit + end-to-end integration
+│   ├── tests/                  86 pytest tests: unit + end-to-end integration
 │   └── alembic/                DB migrations
 └── frontend/                 React + TypeScript SPA
     └── src/
@@ -107,7 +107,7 @@ BacktestIQ/
 
 ## Testing
 
-Backend: 73 pytest tests covering indicators, signal generation, portfolio simulation (including all three position-sizing modes), metrics, auth, data caching, strategy CRUD + versioning (ownership isolation, version snapshots, cascade deletes), public result sharing (token generation, ownership checks, 404 for unshared/unknown runs, no-auth-required verification), and end-to-end integration tests of the backtest, compare, parameter-sweep, and walk-forward endpoints (register → login → run → verify response shape) with a stubbed data source so they never touch the network.
+Backend: 86 pytest tests — every service module has direct or integration coverage, including the AI generator's JSON-parsing/fallback logic (mocked Claude client) and the PDF tearsheet export (real WeasyPrint invocation, asserts on the `%PDF` magic bytes). Covers indicators, signal generation, portfolio simulation (all three position-sizing modes), metrics, auth, data caching, config parsing, strategy CRUD + versioning (ownership isolation, version snapshots, cascade deletes), public result sharing (token generation, ownership checks, 404s for unshared/unknown runs), and end-to-end integration tests of the backtest, compare, parameter-sweep, and walk-forward endpoints — all with a stubbed data source so nothing touches the network.
 
 ```bash
 cd backend && pytest -q
