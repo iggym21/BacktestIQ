@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import Layout from "../components/layout/Layout";
 import VisualBuilder from "../components/strategy/VisualBuilder";
-import CodeEditor from "../components/strategy/CodeEditor";
+import CodeEditor, { DEFAULT_CODE } from "../components/strategy/CodeEditor";
 import AIGenerator from "../components/strategy/AIGenerator";
 import { runBacktest } from "../api/backtest";
 import { saveStrategy } from "../api/strategies";
@@ -12,7 +12,6 @@ import type { SavedStrategy, StrategyConfig, StrategyRuleSet } from "../types";
 type Mode = "visual" | "code" | "ai";
 
 const DEFAULT_RULES: StrategyRuleSet = { entry: [], exit: [], logic: "AND" };
-const DEFAULT_CODE = "";
 
 export default function StrategyPage() {
   const navigate = useNavigate();

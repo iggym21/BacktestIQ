@@ -1,6 +1,6 @@
 import Editor from "@monaco-editor/react";
 
-const DEFAULT_CODE = `def generate_signals(df):
+export const DEFAULT_CODE = `def generate_signals(df):
     """
     df: pandas DataFrame with columns: open, high, low, close, volume
     Returns: pandas Series with values 1 (buy), -1 (sell), 0 (hold)
