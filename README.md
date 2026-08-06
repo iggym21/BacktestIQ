@@ -37,6 +37,9 @@ Built as both a personal research tool and a full-stack/quant portfolio piece.
 <td width="50%"><img src="docs/screenshots/07-ai-generator.jpg" alt="AI strategy generator"><br><sub>AI generator — plain English → strategy config via Claude</sub></td>
 <td width="50%"><img src="docs/screenshots/08-saved-strategies.jpg" alt="Saved strategies list"><br><sub>Saved strategies — load, rerun, or delete past strategies</sub></td>
 </tr>
+<tr>
+<td colspan="2"><img src="docs/screenshots/09-compare-tickers.jpg" alt="Multi-ticker comparison"><br><sub>Compare — run one strategy across up to 5 tickers, normalized return overlay + side-by-side metrics</sub></td>
+</tr>
 </table>
 
 ## Features
@@ -46,6 +49,7 @@ Built as both a personal research tool and a full-stack/quant portfolio piece.
 - **AI strategy generator** — describe a strategy in English, Claude turns it into a runnable config
 - **Vectorized backtest engine** — pandas/numpy-based simulation with long-only and long/short support
 - **Analytics dashboard** — equity curve vs. buy-and-hold benchmark, drawdown chart, monthly returns heatmap, trade log, 13 performance metrics
+- **Multi-ticker comparison** — run one strategy across up to 5 tickers, overlaid normalized-return chart + side-by-side metrics table
 - **PDF tearsheet export** — one-click export of results via WeasyPrint
 - **Auth + saved strategies** — JWT-based accounts, save/revisit past strategies and runs
 - **Historical data** — free OHLCV via yfinance, cached server-side
@@ -145,7 +149,7 @@ SQLite is used by default in dev — no Docker required.
 
 ## Roadmap
 
-- [ ] Multi-ticker comparison
+- [x] Multi-ticker comparison
 - [ ] Parameter optimization sweeps
 - [ ] Walk-forward validation
 - [ ] Alpaca paper trading integration

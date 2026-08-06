@@ -2,15 +2,14 @@ from datetime import date
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database import get_db
-from schemas.backtest import BacktestRequest, BacktestResponse
-from services.data_service import fetch_ohlcv
-from services.signal_generator import generate_signals_from_rules, generate_signals_from_code
-from services.portfolio_simulator import simulate_portfolio, simulate_buy_and_hold
-from services.metrics import calculate_metrics
+from schemas.backtest import BacktestRequest, BacktestResponse, CompareRequest, CompareResponse, TickerResult
+from services.backtest_service import run_strategy_backtest, BacktestDataError, BacktestStrategyError
 from routers.auth import get_current_user
 from models.backtest_run import BacktestRun
 
 router = APIRouter()
+
+MAX_COMPARE_TICKERS = 5
 
 
 @router.post("/run", response_model=BacktestResponse)
@@ -20,48 +19,14 @@ def run_backtest(
     user=Depends(get_current_user),
 ):
     try:
-        df = fetch_ohlcv(req.ticker, req.start_date, req.end_date)
-        benchmark_df = fetch_ohlcv(req.benchmark, req.start_date, req.end_date)
-    except ValueError as e:
+        result = run_strategy_backtest(
+            req.ticker, req.start_date, req.end_date,
+            req.strategy, req.initial_capital, req.benchmark,
+        )
+    except BacktestDataError as e:
         raise HTTPException(status_code=404, detail=str(e))
-
-    if req.strategy.mode == "visual":
-        if not req.strategy.rules:
-            raise HTTPException(status_code=400, detail="Visual mode requires rules")
-        rules_dict = {
-            "entry": [r.model_dump() for r in req.strategy.rules.entry],
-            "exit": [r.model_dump() for r in req.strategy.rules.exit],
-            "logic": req.strategy.rules.logic,
-        }
-        signals = generate_signals_from_rules(df, rules_dict)
-    else:
-        if not req.strategy.code:
-            raise HTTPException(status_code=400, detail="Code mode requires code")
-        try:
-            signals = generate_signals_from_code(df, req.strategy.code)
-        except Exception as e:
-            raise HTTPException(status_code=400, detail=f"Code error: {str(e)}")
-
-    result = simulate_portfolio(df, signals, req.initial_capital)
-    bench_result = simulate_buy_and_hold(benchmark_df, req.initial_capital)
-
-    metrics = calculate_metrics(
-        result["equity_curve"],
-        bench_result["equity_curve"],
-        result["trades"],
-        req.initial_capital,
-    )
-
-    equity_records = result["equity_curve_records"]
-    bench_records = bench_result["equity_curve_records"]
-    bench_map = {r["date"]: r["equity"] for r in bench_records}
-    for rec in equity_records:
-        rec["benchmark_equity"] = bench_map.get(rec["date"], req.initial_capital)
-
-    drawdown_records = [
-        {"date": str(d.date()), "drawdown": round(v, 4)}
-        for d, v in result["drawdown"].items()
-    ]
+    except BacktestStrategyError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
     run = BacktestRun(
         user_id=user.id,
@@ -70,14 +35,35 @@ def run_backtest(
         end_date=date.fromisoformat(req.end_date),
         initial_capital=req.initial_capital,
         benchmark=req.benchmark,
-        metrics=metrics,
+        metrics=result["metrics"],
     )
     db.add(run)
     db.commit()
 
-    return BacktestResponse(
-        metrics=metrics,
-        equity_curve=equity_records,
-        drawdown=drawdown_records,
-        trades=result["trades"],
-    )
+    return BacktestResponse(**result)
+
+
+@router.post("/compare", response_model=CompareResponse)
+def compare_backtest(
+    req: CompareRequest,
+    user=Depends(get_current_user),
+):
+    if not req.tickers:
+        raise HTTPException(status_code=400, detail="At least one ticker is required")
+    if len(req.tickers) > MAX_COMPARE_TICKERS:
+        raise HTTPException(status_code=400, detail=f"Maximum {MAX_COMPARE_TICKERS} tickers per comparison")
+
+    results = []
+    for ticker in req.tickers:
+        try:
+            result = run_strategy_backtest(
+                ticker, req.start_date, req.end_date,
+                req.strategy, req.initial_capital, req.benchmark,
+            )
+            results.append(TickerResult(
+                ticker=ticker, metrics=result["metrics"], equity_curve=result["equity_curve"],
+            ))
+        except (BacktestDataError, BacktestStrategyError) as e:
+            results.append(TickerResult(ticker=ticker, error=str(e)))
+
+    return CompareResponse(results=results)

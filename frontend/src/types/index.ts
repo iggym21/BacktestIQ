@@ -84,6 +84,26 @@ export interface BacktestResult {
   trades: Trade[];
 }
 
+export interface CompareRequest {
+  tickers: string[];
+  start_date: string;
+  end_date: string;
+  strategy: StrategyConfig;
+  initial_capital: number;
+  benchmark: string;
+}
+
+export interface TickerCompareResult {
+  ticker: string;
+  metrics: BacktestMetrics | null;
+  equity_curve: EquityPoint[] | null;
+  error: string | null;
+}
+
+export interface CompareResult {
+  results: TickerCompareResult[];
+}
+
 export interface SavedStrategy {
   id: string;
   name: string;

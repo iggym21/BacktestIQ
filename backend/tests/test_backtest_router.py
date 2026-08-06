@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from fastapi.testclient import TestClient
 from main import app
-import routers.backtest as backtest_router
+import services.backtest_service as backtest_service
 
 client = TestClient(app)
 
@@ -21,7 +21,7 @@ def _synthetic_ohlcv(n=60, seed=1):
 @pytest.fixture(autouse=True)
 def stub_market_data(monkeypatch):
     """The backtest endpoint should never hit the real network in tests."""
-    monkeypatch.setattr(backtest_router, "fetch_ohlcv", lambda ticker, start, end: _synthetic_ohlcv())
+    monkeypatch.setattr(backtest_service, "fetch_ohlcv", lambda ticker, start, end: _synthetic_ohlcv())
 
 
 def _auth_headers():
@@ -69,4 +69,62 @@ def test_run_backtest_requires_auth():
         "strategy": {"mode": "visual", "rules": {"entry": [], "exit": [], "logic": "AND"}},
     }
     resp = client.post("/backtest/run", json=payload)
+    assert resp.status_code == 401
+
+
+def _compare_payload(tickers):
+    return {
+        "tickers": tickers,
+        "start_date": "2022-01-01",
+        "end_date": "2022-03-01",
+        "benchmark": "SPY",
+        "initial_capital": 10000,
+        "strategy": {
+            "mode": "visual",
+            "rules": {
+                "entry": [{"indicator": "CLOSE", "params": {}, "operator": ">", "target": {"value": 0}}],
+                "exit": [{"indicator": "CLOSE", "params": {}, "operator": "<", "target": {"value": 0}}],
+                "logic": "AND",
+            },
+        },
+    }
+
+
+def test_compare_backtest_runs_same_strategy_across_tickers():
+    headers = _auth_headers()
+    resp = client.post("/backtest/compare", json=_compare_payload(["AAPL", "MSFT", "GOOGL"]), headers=headers)
+    assert resp.status_code == 200, resp.text
+    results = resp.json()["results"]
+    assert [r["ticker"] for r in results] == ["AAPL", "MSFT", "GOOGL"]
+    for r in results:
+        assert r["error"] is None
+        assert r["metrics"]["num_trades"] >= 1
+
+
+def test_compare_backtest_one_bad_ticker_does_not_fail_the_others(monkeypatch):
+    headers = _auth_headers()
+
+    def flaky_fetch(ticker, start, end):
+        if ticker == "BADTICKER":
+            raise ValueError(f"No data found for {ticker}")
+        return _synthetic_ohlcv()
+
+    monkeypatch.setattr(backtest_service, "fetch_ohlcv", flaky_fetch)
+    resp = client.post("/backtest/compare", json=_compare_payload(["AAPL", "BADTICKER"]), headers=headers)
+    assert resp.status_code == 200, resp.text
+    results = {r["ticker"]: r for r in resp.json()["results"]}
+    assert results["AAPL"]["error"] is None
+    assert results["AAPL"]["metrics"] is not None
+    assert results["BADTICKER"]["error"] == "No data found for BADTICKER"
+    assert results["BADTICKER"]["metrics"] is None
+
+
+def test_compare_backtest_rejects_too_many_tickers():
+    headers = _auth_headers()
+    resp = client.post("/backtest/compare", json=_compare_payload(["A", "B", "C", "D", "E", "F"]), headers=headers)
+    assert resp.status_code == 400
+
+
+def test_compare_backtest_requires_auth():
+    resp = client.post("/backtest/compare", json=_compare_payload(["AAPL"]))
     assert resp.status_code == 401

@@ -8,6 +8,7 @@ import HomePage from "./pages/HomePage";
 import StrategyPage from "./pages/StrategyPage";
 import ResultsPage from "./pages/ResultsPage";
 import SavedStrategiesPage from "./pages/SavedStrategiesPage";
+import ComparePage from "./pages/ComparePage";
 
 export default function App() {
   return (
@@ -26,6 +27,7 @@ export default function App() {
           <Route path="/strategy" element={<ProtectedRoute><StrategyPage /></ProtectedRoute>} />
           <Route path="/results" element={<ProtectedRoute><ResultsPage /></ProtectedRoute>} />
           <Route path="/saved" element={<ProtectedRoute><SavedStrategiesPage /></ProtectedRoute>} />
+          <Route path="/compare" element={<ProtectedRoute><ComparePage /></ProtectedRoute>} />
           <Route path="*" element={
             <div className="min-h-screen bg-slate-950 flex items-center justify-center">
               <div className="text-center">

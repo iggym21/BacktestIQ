@@ -41,3 +41,23 @@ class BacktestResponse(BaseModel):
     equity_curve: list[dict]
     drawdown: list[dict]
     trades: list[dict]
+
+
+class CompareRequest(BaseModel):
+    tickers: list[str]
+    start_date: str
+    end_date: str
+    strategy: StrategyPayload
+    initial_capital: float = 10000.0
+    benchmark: str = "SPY"
+
+
+class TickerResult(BaseModel):
+    ticker: str
+    metrics: dict[str, Any] | None = None
+    equity_curve: list[dict] | None = None
+    error: str | None = None
+
+
+class CompareResponse(BaseModel):
+    results: list[TickerResult]
