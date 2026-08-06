@@ -11,55 +11,71 @@ export default function HomePage() {
     { icon: "📄", title: "PDF Tearsheets", desc: "Export professional-grade tearsheets for sharing or documentation." },
   ];
 
+  const ctas = [
+    { to: "/strategy", label: "New Strategy", primary: true },
+    { to: "/saved", label: "Saved Strategies" },
+    { to: "/compare", label: "Compare Tickers" },
+    { to: "/optimize", label: "Optimize Parameters" },
+    { to: "/walkforward", label: "Walk-Forward Validation" },
+  ];
+
   return (
     <Layout>
-      <div className="text-center py-16">
-        <h1 className="text-5xl font-bold text-white mb-4 tracking-tight">
+      <div className="relative text-center py-20 -mx-4 sm:-mx-6 px-4 sm:px-6 overflow-hidden">
+        {/* Ambient background: soft radial glow + faint grid, financial-terminal texture */}
+        <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+          <div
+            className="absolute left-1/2 top-0 h-[420px] w-[820px] -translate-x-1/2 rounded-full opacity-30 blur-3xl"
+            style={{ background: "radial-gradient(closest-side, var(--brand), transparent)" }}
+          />
+          <div
+            className="absolute inset-0 opacity-[0.04]"
+            style={{
+              backgroundImage:
+                "linear-gradient(var(--ink) 1px, transparent 1px), linear-gradient(90deg, var(--ink) 1px, transparent 1px)",
+              backgroundSize: "48px 48px",
+              maskImage: "linear-gradient(to bottom, black, transparent 80%)",
+            }}
+          />
+        </div>
+
+        <span className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium text-ink-muted mb-6"
+          style={{ borderColor: "var(--line)", background: "var(--surface)" }}>
+          <span className="h-1.5 w-1.5 rounded-full bg-positive" />
+          Live market data · Institutional-grade analytics
+        </span>
+
+        <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight mb-5 bg-clip-text text-transparent bg-linear-to-r from-ink to-brand">
           Test Your Trading Strategies
         </h1>
-        <p className="text-xl text-slate-400 mb-10 max-w-2xl mx-auto">
+        <p className="text-lg sm:text-xl text-ink-muted mb-10 max-w-2xl mx-auto">
           Backtest against real market data, powered by AI strategy generation and professional analytics.
         </p>
-        <div className="flex gap-4 justify-center flex-wrap">
-          <Link
-            to="/strategy"
-            className="bg-violet-600 hover:bg-violet-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors"
-          >
-            New Strategy
-          </Link>
-          <Link
-            to="/saved"
-            className="bg-slate-800 hover:bg-slate-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors border border-slate-700"
-          >
-            Saved Strategies
-          </Link>
-          <Link
-            to="/compare"
-            className="bg-slate-800 hover:bg-slate-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors border border-slate-700"
-          >
-            Compare Tickers
-          </Link>
-          <Link
-            to="/optimize"
-            className="bg-slate-800 hover:bg-slate-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors border border-slate-700"
-          >
-            Optimize Parameters
-          </Link>
-          <Link
-            to="/walkforward"
-            className="bg-slate-800 hover:bg-slate-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors border border-slate-700"
-          >
-            Walk-Forward Validation
-          </Link>
+        <div className="flex gap-3 justify-center flex-wrap">
+          {ctas.map((c) => (
+            <Link
+              key={c.to}
+              to={c.to}
+              className={`px-6 py-3 text-sm sm:text-base ${c.primary ? "btn-primary" : "btn-secondary"}`}
+            >
+              {c.label}
+            </Link>
+          ))}
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-8">
         {features.map((f) => (
-          <div key={f.title} className="bg-slate-900 rounded-xl p-6 border border-slate-800">
-            <div className="text-3xl mb-3">{f.icon}</div>
-            <h3 className="text-white font-semibold mb-1">{f.title}</h3>
-            <p className="text-slate-400 text-sm">{f.desc}</p>
+          <div key={f.title} className="card p-6 hover:-translate-y-0.5 hover:shadow-lg transition-transform duration-200">
+            <div
+              className="flex h-11 w-11 items-center justify-center rounded-xl text-2xl mb-4"
+              style={{ background: "var(--brand-soft)" }}
+              aria-hidden="true"
+            >
+              {f.icon}
+            </div>
+            <h3 className="text-ink font-semibold mb-1.5">{f.title}</h3>
+            <p className="text-ink-muted text-sm leading-relaxed">{f.desc}</p>
           </div>
         ))}
       </div>

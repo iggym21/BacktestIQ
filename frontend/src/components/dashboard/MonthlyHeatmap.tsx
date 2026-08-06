@@ -34,26 +34,26 @@ export default function MonthlyHeatmap({ data }: { data: EquityPoint[] }) {
   const years = Object.keys(monthly).sort();
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 overflow-x-auto">
-      <h3 className="text-white font-semibold mb-4">Monthly Returns</h3>
-      <table className="text-xs w-full border-separate border-spacing-0.5">
+    <div className="card p-5 overflow-x-auto">
+      <h3 className="text-ink font-semibold mb-4">Monthly Returns</h3>
+      <table className="text-xs w-full border-separate border-spacing-0.5 font-mono">
         <thead>
           <tr>
-            <th className="text-slate-400 text-left pr-3 pb-2">Year</th>
-            {MONTHS.map((m) => <th key={m} className="text-slate-400 pb-2 w-10">{m}</th>)}
+            <th className="text-ink-muted text-left pr-3 pb-2 font-sans font-medium">Year</th>
+            {MONTHS.map((m) => <th key={m} className="text-ink-muted pb-2 w-10 font-sans font-medium">{m}</th>)}
           </tr>
         </thead>
         <tbody>
           {years.map((year) => (
             <tr key={year}>
-              <td className="text-slate-400 pr-3 py-0.5 font-medium">{year}</td>
+              <td className="text-ink-muted pr-3 py-0.5 font-medium font-sans">{year}</td>
               {Array.from({ length: 12 }, (_, i) => {
                 const v = monthly[year][i + 1];
                 const intensity = v !== undefined
                   ? Math.min(9, Math.max(1, Math.round(Math.abs(v) / 15 * 9)))
                   : 0;
                 const bg = v === undefined
-                  ? "bg-slate-800 text-slate-600"
+                  ? "bg-surface-2 text-ink-faint"
                   : v >= 0
                   ? POSITIVE_SHADES[intensity - 1]
                   : NEGATIVE_SHADES[intensity - 1];

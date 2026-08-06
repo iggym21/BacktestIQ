@@ -18,10 +18,10 @@ const METRIC_LABELS: Record<keyof BacktestMetrics, { label: string; format: (v: 
 
 function color(key: keyof BacktestMetrics, v: number): string {
   if (["total_return", "annualized_return", "sharpe", "sortino", "win_rate", "avg_win", "alpha", "calmar"].includes(key)) {
-    return v >= 0 ? "text-emerald-400" : "text-red-400";
+    return v >= 0 ? "text-positive" : "text-negative";
   }
-  if (key === "max_drawdown") return v >= -0.1 ? "text-emerald-400" : v >= -0.2 ? "text-yellow-400" : "text-red-400";
-  return "text-white";
+  if (key === "max_drawdown") return v >= -0.1 ? "text-positive" : v >= -0.2 ? "text-warning" : "text-negative";
+  return "text-ink";
 }
 
 export default function MetricsPanel({ metrics }: { metrics: BacktestMetrics }) {
@@ -31,9 +31,9 @@ export default function MetricsPanel({ metrics }: { metrics: BacktestMetrics }) 
         const { label, format, tooltip } = METRIC_LABELS[key];
         const v = metrics[key];
         return (
-          <div key={key} title={tooltip} className="bg-slate-900 border border-slate-800 rounded-xl p-4 cursor-help">
-            <div className="text-xs text-slate-400 mb-1">{label}</div>
-            <div className={`text-xl font-bold ${color(key, v)}`}>{format(v)}</div>
+          <div key={key} title={tooltip} className="card p-4 cursor-help hover:-translate-y-0.5 transition-transform duration-200">
+            <div className="text-xs text-ink-muted mb-1">{label}</div>
+            <div className={`text-xl font-bold font-mono ${color(key, v)}`}>{format(v)}</div>
           </div>
         );
       })}

@@ -28,7 +28,7 @@ export default function AIGenerator({ onStrategyGenerated }: Props) {
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-slate-300 mb-1.5">
+        <label className="block text-sm font-medium text-ink-muted mb-1.5">
           Describe your strategy
         </label>
         <textarea
@@ -36,13 +36,13 @@ export default function AIGenerator({ onStrategyGenerated }: Props) {
           onChange={(e) => setDescription(e.target.value)}
           rows={4}
           placeholder="e.g. Buy when 50-day MA crosses above 200-day MA, sell when RSI exceeds 70"
-          className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
+          className="surface-input w-full px-4 py-3 text-sm resize-none"
         />
       </div>
       <button
         onClick={handleGenerate}
         disabled={loading || !description.trim()}
-        className="w-full bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white font-semibold py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2"
+        className="btn-primary w-full py-2.5 flex items-center justify-center gap-2"
       >
         {loading ? (
           <>
@@ -52,7 +52,7 @@ export default function AIGenerator({ onStrategyGenerated }: Props) {
           "✨ Generate Strategy with AI"
         )}
       </button>
-      <p className="text-xs text-slate-500">
+      <p className="text-xs text-ink-faint">
         Powered by Claude. Requires ANTHROPIC_API_KEY to be set in backend .env.
       </p>
     </div>

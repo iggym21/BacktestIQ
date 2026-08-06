@@ -108,34 +108,34 @@ export default function StrategyPage() {
   return (
     <Layout>
       <div className="max-w-4xl mx-auto">
-        <h2 className="text-2xl font-bold text-white mb-6">Strategy Builder</h2>
+        <h2 className="text-2xl font-bold text-ink mb-6">Strategy Builder</h2>
 
         {/* Config row */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
           <div>
-            <label htmlFor="strategy-ticker" className="block text-xs text-slate-400 mb-1">Ticker</label>
+            <label htmlFor="strategy-ticker" className="block text-xs text-ink-muted mb-1">Ticker</label>
             <input id="strategy-ticker" value={ticker} onChange={(e) => setTicker(e.target.value.toUpperCase())}
-              className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm uppercase" />
+              className="surface-input w-full px-3 py-2 text-sm uppercase font-mono" />
           </div>
           <div>
-            <label htmlFor="strategy-start-date" className="block text-xs text-slate-400 mb-1">Start Date</label>
+            <label htmlFor="strategy-start-date" className="block text-xs text-ink-muted mb-1">Start Date</label>
             <input id="strategy-start-date" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
-              className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm" />
+              className="surface-input w-full px-3 py-2 text-sm" />
           </div>
           <div>
-            <label htmlFor="strategy-end-date" className="block text-xs text-slate-400 mb-1">End Date</label>
+            <label htmlFor="strategy-end-date" className="block text-xs text-ink-muted mb-1">End Date</label>
             <input id="strategy-end-date" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)}
-              className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm" />
+              className="surface-input w-full px-3 py-2 text-sm" />
           </div>
           <div>
-            <label htmlFor="strategy-capital" className="block text-xs text-slate-400 mb-1">Capital ($)</label>
+            <label htmlFor="strategy-capital" className="block text-xs text-ink-muted mb-1">Capital ($)</label>
             <input id="strategy-capital" type="number" value={capital} onChange={(e) => setCapital(Number(e.target.value))}
-              className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm" />
+              className="surface-input w-full px-3 py-2 text-sm font-mono" />
           </div>
           <div>
-            <label htmlFor="strategy-benchmark" className="block text-xs text-slate-400 mb-1">Benchmark</label>
+            <label htmlFor="strategy-benchmark" className="block text-xs text-ink-muted mb-1">Benchmark</label>
             <input id="strategy-benchmark" value={benchmark} onChange={(e) => setBenchmark(e.target.value.toUpperCase())}
-              className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm uppercase" />
+              className="surface-input w-full px-3 py-2 text-sm uppercase font-mono" />
           </div>
           <PositionSizingInput value={positionSizing} onChange={setPositionSizing} />
         </div>
@@ -144,17 +144,17 @@ export default function StrategyPage() {
         <div className="flex gap-2 mb-6">
           {(["visual", "code", "ai"] as Mode[]).map((m) => (
             <button key={m} onClick={() => setMode(m)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition-colors ${mode === m ? "bg-violet-600 text-white" : "bg-slate-800 text-slate-400 hover:text-white"}`}>
+              className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition-colors ${mode === m ? "bg-brand text-white" : "bg-surface-2 text-ink-muted hover:text-ink"}`}>
               {m === "ai" ? "✨ AI Generate" : m === "code" ? "{ } Code" : "Visual"}
             </button>
           ))}
         </div>
 
         {/* Builder area */}
-        <div className="bg-slate-900 rounded-xl border border-slate-800 p-6 mb-6">
+        <div className="card p-6 mb-6">
           {mode === "visual" && <VisualBuilder value={rules} onChange={setRules} />}
           {mode === "code" && (
-            <Suspense fallback={<div className="text-slate-400 text-sm py-10 text-center">Loading editor…</div>}>
+            <Suspense fallback={<div className="text-ink-muted text-sm py-10 text-center">Loading editor…</div>}>
               <CodeEditor value={code} onChange={setCode} />
             </Suspense>
           )}
@@ -164,11 +164,11 @@ export default function StrategyPage() {
         {/* Actions */}
         <div className="flex gap-3">
           <button onClick={handleRun} disabled={loading}
-            className="flex-1 bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2">
+            className="btn-primary flex-1 py-3 flex items-center justify-center gap-2">
             {loading ? <><span className="animate-spin">&#x27F3;</span> Running…</> : "Run Backtest"}
           </button>
           <button onClick={() => setShowSaveModal(true)}
-            className="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors">
+            className="btn-secondary px-6 py-3">
             {loadedId ? "Save…" : "Save"}
           </button>
         </div>
@@ -176,26 +176,26 @@ export default function StrategyPage() {
 
       {/* Save modal */}
       {showSaveModal && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 w-full max-w-sm">
-            <h3 className="text-white font-semibold mb-4">{loadedId ? "Update Strategy" : "Save Strategy"}</h3>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="card p-6 w-full max-w-sm">
+            <h3 className="text-ink font-semibold mb-4">{loadedId ? "Update Strategy" : "Save Strategy"}</h3>
             <input value={saveName} onChange={(e) => setSaveName(e.target.value)}
               placeholder="Strategy name"
-              className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-4 py-2 mb-4" />
+              className="surface-input w-full px-4 py-2 mb-4" />
             {loadedId ? (
               <div className="flex flex-col gap-2">
-                <button onClick={handleUpdate} className="bg-violet-600 hover:bg-violet-700 text-white py-2 rounded-lg">
+                <button onClick={handleUpdate} className="btn-primary py-2">
                   Update (keeps version history)
                 </button>
-                <button onClick={handleSaveAsNew} className="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white py-2 rounded-lg">
+                <button onClick={handleSaveAsNew} className="btn-secondary py-2">
                   Save as New Strategy
                 </button>
-                <button onClick={() => setShowSaveModal(false)} className="text-slate-400 hover:text-white text-sm py-1">Cancel</button>
+                <button onClick={() => setShowSaveModal(false)} className="text-ink-muted hover:text-ink text-sm py-1">Cancel</button>
               </div>
             ) : (
               <div className="flex gap-3">
-                <button onClick={handleSaveAsNew} className="flex-1 bg-violet-600 hover:bg-violet-700 text-white py-2 rounded-lg">Save</button>
-                <button onClick={() => setShowSaveModal(false)} className="flex-1 bg-slate-800 hover:bg-slate-700 text-white py-2 rounded-lg">Cancel</button>
+                <button onClick={handleSaveAsNew} className="btn-primary flex-1 py-2">Save</button>
+                <button onClick={() => setShowSaveModal(false)} className="btn-secondary flex-1 py-2">Cancel</button>
               </div>
             )}
           </div>

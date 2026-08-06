@@ -68,6 +68,7 @@ Built as both a personal research tool and a full-stack/quant portfolio piece.
 - **Auth + saved strategies with version history** — JWT-based accounts, save/revisit past strategies; every update archives the previous config and can be restored with one click
 - **Shareable public results** — generate an unauthenticated read-only link to a backtest's full dashboard, no account needed to view
 - **Historical data** — free OHLCV via yfinance, cached server-side
+- **Light/dark themes** — a financial-terminal design system (Inter + JetBrains Mono for numeric data, semantic gain/loss coloring, theme-aware charts) with a persisted, animated toggle
 
 ## Tech stack
 
@@ -100,7 +101,8 @@ BacktestIQ/
         ├── pages/              Home, Strategy, Results, Saved Strategies
         ├── components/         auth, strategy builder, dashboard, layout
         ├── api/                 typed API client (Axios + JWT interceptor)
-        └── context/             auth state
+        ├── context/             auth + theme state
+        └── lib/                 theme-aware Recharts color palette
 ```
 
 **Request flow for a backtest run:** the frontend posts ticker/date-range/strategy config to `POST /backtest/run` → the backend fetches (and caches) OHLCV data → generates buy/sell signals from either the visual rule tree or the submitted Python code → simulates the portfolio bar-by-bar → simulates a buy-and-hold benchmark over the same period → computes 13 performance metrics (including alpha/beta via linear regression against the benchmark) → persists the run and returns the full result set for the dashboard.

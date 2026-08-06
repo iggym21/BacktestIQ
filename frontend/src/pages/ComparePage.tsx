@@ -5,15 +5,17 @@ import Layout from "../components/layout/Layout";
 import VisualBuilder from "../components/strategy/VisualBuilder";
 import PositionSizingInput from "../components/strategy/PositionSizingInput";
 import { compareBacktest } from "../api/backtest";
+import { useChartTheme } from "../lib/chartTheme";
 import type { PositionSizing, StrategyRuleSet, TickerCompareResult } from "../types";
 
 const DEFAULT_RULES: StrategyRuleSet = { entry: [], exit: [], logic: "AND" };
 const DEFAULT_POSITION_SIZING: PositionSizing = { type: "percent", value: 100 };
-const LINE_COLORS = ["#7c3aed", "#22c55e", "#f59e0b", "#ec4899", "#38bdf8"];
+const LINE_COLORS = ["#8b5cf6", "#22c55e", "#f59e0b", "#ec4899", "#38bdf8"];
 
 const pct = (v: number) => `${(v * 100).toFixed(2)}%`;
 
 export default function ComparePage() {
+  const ct = useChartTheme();
   const [tickersInput, setTickersInput] = useState("AAPL, MSFT, GOOGL");
   const [startDate, setStartDate] = useState("2020-01-01");
   const [endDate, setEndDate] = useState("2023-12-31");
@@ -70,63 +72,65 @@ export default function ComparePage() {
   return (
     <Layout>
       <div className="max-w-5xl mx-auto">
-        <h2 className="text-2xl font-bold text-white mb-1">Compare Tickers</h2>
-        <p className="text-slate-400 text-sm mb-6">Run one strategy across up to 5 tickers and compare results side by side.</p>
+        <h2 className="text-2xl font-bold text-ink mb-1">Compare Tickers</h2>
+        <p className="text-ink-muted text-sm mb-6">Run one strategy across up to 5 tickers and compare results side by side.</p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div className="md:col-span-3">
-            <label htmlFor="compare-tickers" className="block text-xs text-slate-400 mb-1">Tickers (comma-separated, up to 5)</label>
+            <label htmlFor="compare-tickers" className="block text-xs text-ink-muted mb-1">Tickers (comma-separated, up to 5)</label>
             <input id="compare-tickers" value={tickersInput} onChange={(e) => setTickersInput(e.target.value)}
               placeholder="AAPL, MSFT, GOOGL"
-              className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm uppercase" />
+              className="surface-input w-full px-3 py-2 text-sm uppercase font-mono" />
           </div>
           <div>
-            <label htmlFor="compare-start-date" className="block text-xs text-slate-400 mb-1">Start Date</label>
+            <label htmlFor="compare-start-date" className="block text-xs text-ink-muted mb-1">Start Date</label>
             <input id="compare-start-date" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
-              className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm" />
+              className="surface-input w-full px-3 py-2 text-sm" />
           </div>
           <div>
-            <label htmlFor="compare-end-date" className="block text-xs text-slate-400 mb-1">End Date</label>
+            <label htmlFor="compare-end-date" className="block text-xs text-ink-muted mb-1">End Date</label>
             <input id="compare-end-date" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)}
-              className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm" />
+              className="surface-input w-full px-3 py-2 text-sm" />
           </div>
           <div>
-            <label htmlFor="compare-capital" className="block text-xs text-slate-400 mb-1">Capital ($)</label>
+            <label htmlFor="compare-capital" className="block text-xs text-ink-muted mb-1">Capital ($)</label>
             <input id="compare-capital" type="number" value={capital} onChange={(e) => setCapital(Number(e.target.value))}
-              className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm" />
+              className="surface-input w-full px-3 py-2 text-sm font-mono" />
           </div>
           <PositionSizingInput value={positionSizing} onChange={setPositionSizing} />
           <div>
-            <label htmlFor="compare-benchmark" className="block text-xs text-slate-400 mb-1">Benchmark</label>
+            <label htmlFor="compare-benchmark" className="block text-xs text-ink-muted mb-1">Benchmark</label>
             <input id="compare-benchmark" value={benchmark} onChange={(e) => setBenchmark(e.target.value.toUpperCase())}
-              className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm uppercase" />
+              className="surface-input w-full px-3 py-2 text-sm uppercase font-mono" />
           </div>
         </div>
 
-        <div className="bg-slate-900 rounded-xl border border-slate-800 p-6 mb-6">
+        <div className="card p-6 mb-6">
           <VisualBuilder value={rules} onChange={setRules} />
         </div>
 
         <button onClick={handleRun} disabled={loading}
-          className="w-full bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2 mb-8">
+          className="btn-primary w-full py-3 flex items-center justify-center gap-2 mb-8">
           {loading ? <><span className="animate-spin">&#x27F3;</span> Comparing…</> : "Run Comparison"}
         </button>
 
         {results && (
           <div className="space-y-6">
             {chartData.length > 0 && (
-              <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
-                <h3 className="text-white font-semibold mb-4">Return Comparison (%)</h3>
-                <ResponsiveContainer width="100%" height={320}>
-                  <LineChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                    <XAxis dataKey="date" tick={{ fill: "#64748b", fontSize: 11 }} tickLine={false}
-                      tickFormatter={(d: string) => d.slice(0, 7)} />
-                    <YAxis tick={{ fill: "#64748b", fontSize: 11 }} tickLine={false}
-                      tickFormatter={(v: number) => `${v.toFixed(0)}%`} />
-                    <Tooltip contentStyle={{ background: "#0f172a", border: "1px solid #1e293b", color: "#fff" }}
+              <div className="card p-5">
+                <h3 className="text-ink font-semibold mb-4">Return Comparison (%)</h3>
+                <ResponsiveContainer width="100%" height={340}>
+                  <LineChart data={chartData} margin={{ left: 8, bottom: 8 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={ct.grid} />
+                    <XAxis dataKey="date" tick={{ fill: ct.tick, fontSize: 11 }} tickLine={false}
+                      tickFormatter={(d: string) => d.slice(0, 7)}
+                      label={{ value: "Date", position: "insideBottom", offset: -6, fill: ct.axisLabel, fontSize: 11 }} />
+                    <YAxis tick={{ fill: ct.tick, fontSize: 11 }} tickLine={false}
+                      tickFormatter={(v: number) => `${v.toFixed(0)}%`}
+                      label={{ value: "Return (%)", angle: -90, position: "insideLeft", fill: ct.axisLabel, fontSize: 11, style: { textAnchor: "middle" } }} />
+                    <Tooltip contentStyle={{ background: ct.tooltipBg, border: `1px solid ${ct.tooltipBorder}`, color: ct.tooltipText, borderRadius: 10 }}
                       formatter={(v) => [`${Number(v).toFixed(2)}%`, ""]} />
-                    <Legend wrapperStyle={{ fontSize: 12 }} />
+                    <Legend verticalAlign="top" height={28} wrapperStyle={{ fontSize: 12, color: ct.axisLabel }} />
                     {successful.map((r, i) => (
                       <Line key={r.ticker} type="monotone" dataKey={r.ticker} name={r.ticker}
                         stroke={LINE_COLORS[i % LINE_COLORS.length]} strokeWidth={2} dot={false} />
@@ -136,34 +140,34 @@ export default function ComparePage() {
               </div>
             )}
 
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 overflow-x-auto">
-              <h3 className="text-white font-semibold mb-4">Metrics</h3>
-              <table className="w-full text-sm">
+            <div className="card p-5 overflow-x-auto">
+              <h3 className="text-ink font-semibold mb-4">Metrics</h3>
+              <table className="w-full text-sm font-mono">
                 <thead>
-                  <tr className="text-slate-400 text-left border-b border-slate-800">
-                    <th className="py-2 pr-4">Ticker</th>
-                    <th className="py-2 pr-4">Total Return</th>
-                    <th className="py-2 pr-4">Ann. Return</th>
-                    <th className="py-2 pr-4">Sharpe</th>
-                    <th className="py-2 pr-4">Max Drawdown</th>
-                    <th className="py-2 pr-4">Win Rate</th>
-                    <th className="py-2 pr-4">Trades</th>
+                  <tr className="text-ink-muted text-left border-b" style={{ borderColor: "var(--line)" }}>
+                    <th className="py-2 pr-4 font-sans font-medium">Ticker</th>
+                    <th className="py-2 pr-4 font-sans font-medium">Total Return</th>
+                    <th className="py-2 pr-4 font-sans font-medium">Ann. Return</th>
+                    <th className="py-2 pr-4 font-sans font-medium">Sharpe</th>
+                    <th className="py-2 pr-4 font-sans font-medium">Max Drawdown</th>
+                    <th className="py-2 pr-4 font-sans font-medium">Win Rate</th>
+                    <th className="py-2 pr-4 font-sans font-medium">Trades</th>
                   </tr>
                 </thead>
                 <tbody>
                   {results.map((r) => (
-                    <tr key={r.ticker} className="border-b border-slate-800/50">
-                      <td className="py-2 pr-4 text-white font-medium">{r.ticker}</td>
+                    <tr key={r.ticker} className="border-b" style={{ borderColor: "var(--line)" }}>
+                      <td className="py-2 pr-4 text-ink font-medium">{r.ticker}</td>
                       {r.error ? (
-                        <td colSpan={6} className="py-2 pr-4 text-red-400">{r.error}</td>
+                        <td colSpan={6} className="py-2 pr-4 text-negative font-sans">{r.error}</td>
                       ) : (
                         <>
-                          <td className={`py-2 pr-4 ${r.metrics!.total_return >= 0 ? "text-emerald-400" : "text-red-400"}`}>{pct(r.metrics!.total_return)}</td>
-                          <td className="py-2 pr-4 text-slate-200">{pct(r.metrics!.annualized_return)}</td>
-                          <td className="py-2 pr-4 text-slate-200">{r.metrics!.sharpe.toFixed(3)}</td>
-                          <td className="py-2 pr-4 text-red-400">{pct(r.metrics!.max_drawdown)}</td>
-                          <td className="py-2 pr-4 text-slate-200">{pct(r.metrics!.win_rate)}</td>
-                          <td className="py-2 pr-4 text-slate-200">{r.metrics!.num_trades}</td>
+                          <td className={`py-2 pr-4 ${r.metrics!.total_return >= 0 ? "text-positive" : "text-negative"}`}>{pct(r.metrics!.total_return)}</td>
+                          <td className="py-2 pr-4 text-ink-muted">{pct(r.metrics!.annualized_return)}</td>
+                          <td className="py-2 pr-4 text-ink-muted">{r.metrics!.sharpe.toFixed(3)}</td>
+                          <td className="py-2 pr-4 text-negative">{pct(r.metrics!.max_drawdown)}</td>
+                          <td className="py-2 pr-4 text-ink-muted">{pct(r.metrics!.win_rate)}</td>
+                          <td className="py-2 pr-4 text-ink-muted">{r.metrics!.num_trades}</td>
                         </>
                       )}
                     </tr>

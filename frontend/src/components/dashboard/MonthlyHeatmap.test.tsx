@@ -33,7 +33,7 @@ describe("MonthlyHeatmap", () => {
     const noData = screen.getAllByTitle("No data");
     expect(noData.length).toBeGreaterThan(0);
     for (const cell of noData) {
-      expect(cell.className).toContain("bg-slate-800");
+      expect(cell.className).toContain("bg-surface-2");
     }
   });
 });

@@ -51,27 +51,27 @@ function RuleFormRow({ onAdd }: { onAdd: (r: StrategyRule) => void }) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-2 items-end">
       <div>
-        <label htmlFor={`${uid}-indicator`} className="block text-xs text-slate-400 mb-1">Indicator</label>
+        <label htmlFor={`${uid}-indicator`} className="block text-xs text-ink-muted mb-1">Indicator</label>
         <select id={`${uid}-indicator`} value={form.indicator} onChange={(e) => set("indicator", e.target.value)}
-          className="w-full bg-slate-800 border border-slate-700 text-white rounded px-2 py-1.5 text-sm">
+          className="w-full surface-input rounded-lg px-2 py-1.5 text-sm">
           {INDICATORS.map((i) => <option key={i}>{i}</option>)}
         </select>
         {needsPeriod(form.indicator) && (
           <input type="number" min="1" aria-label="Period" value={form.period} onChange={(e) => set("period", e.target.value)}
-            placeholder="Period" className="mt-1 w-full bg-slate-800 border border-slate-700 text-white rounded px-2 py-1.5 text-sm" />
+            placeholder="Period" className="mt-1 w-full surface-input rounded-lg px-2 py-1.5 text-sm" />
         )}
       </div>
       <div>
-        <label htmlFor={`${uid}-operator`} className="block text-xs text-slate-400 mb-1">Operator</label>
+        <label htmlFor={`${uid}-operator`} className="block text-xs text-ink-muted mb-1">Operator</label>
         <select id={`${uid}-operator`} value={form.operator} onChange={(e) => set("operator", e.target.value)}
-          className="w-full bg-slate-800 border border-slate-700 text-white rounded px-2 py-1.5 text-sm">
+          className="w-full surface-input rounded-lg px-2 py-1.5 text-sm">
           {OPERATORS.map((o) => <option key={o}>{o}</option>)}
         </select>
       </div>
       <div>
-        <label htmlFor={`${uid}-target-type`} className="block text-xs text-slate-400 mb-1">Target type</label>
+        <label htmlFor={`${uid}-target-type`} className="block text-xs text-ink-muted mb-1">Target type</label>
         <select id={`${uid}-target-type`} value={form.targetType} onChange={(e) => set("targetType", e.target.value as "value" | "indicator")}
-          className="w-full bg-slate-800 border border-slate-700 text-white rounded px-2 py-1.5 text-sm">
+          className="w-full surface-input rounded-lg px-2 py-1.5 text-sm">
           <option value="value">Fixed value</option>
           <option value="indicator">Indicator</option>
         </select>
@@ -79,26 +79,26 @@ function RuleFormRow({ onAdd }: { onAdd: (r: StrategyRule) => void }) {
       <div>
         {form.targetType === "value" ? (
           <>
-            <label htmlFor={`${uid}-target-value`} className="block text-xs text-slate-400 mb-1">Value</label>
+            <label htmlFor={`${uid}-target-value`} className="block text-xs text-ink-muted mb-1">Value</label>
             <input id={`${uid}-target-value`} type="number" value={form.targetValue} onChange={(e) => set("targetValue", e.target.value)}
-              className="w-full bg-slate-800 border border-slate-700 text-white rounded px-2 py-1.5 text-sm" />
+              className="w-full surface-input rounded-lg px-2 py-1.5 text-sm" />
           </>
         ) : (
           <>
-            <label htmlFor={`${uid}-target-indicator`} className="block text-xs text-slate-400 mb-1">Indicator</label>
+            <label htmlFor={`${uid}-target-indicator`} className="block text-xs text-ink-muted mb-1">Indicator</label>
             <select id={`${uid}-target-indicator`} value={form.targetIndicator} onChange={(e) => set("targetIndicator", e.target.value)}
-              className="w-full bg-slate-800 border border-slate-700 text-white rounded px-2 py-1.5 text-sm">
+              className="w-full surface-input rounded-lg px-2 py-1.5 text-sm">
               {INDICATORS.map((i) => <option key={i}>{i}</option>)}
             </select>
             {needsPeriod(form.targetIndicator) && (
               <input type="number" min="1" aria-label="Target period" value={form.targetPeriod} onChange={(e) => set("targetPeriod", e.target.value)}
-                placeholder="Period" className="mt-1 w-full bg-slate-800 border border-slate-700 text-white rounded px-2 py-1.5 text-sm" />
+                placeholder="Period" className="mt-1 w-full surface-input rounded-lg px-2 py-1.5 text-sm" />
             )}
           </>
         )}
       </div>
       <button onClick={() => { onAdd(formToRule(form)); setForm(defaultForm()); }}
-        className="col-span-2 md:col-span-4 bg-violet-700 hover:bg-violet-600 text-white text-sm rounded px-3 py-1.5 transition-colors">
+        className="btn-primary col-span-2 md:col-span-4 text-sm px-3 py-1.5">
         + Add Rule
       </button>
     </div>
@@ -114,17 +114,20 @@ export default function VisualBuilder({ value, onChange }: Props) {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <span className="text-sm text-slate-400">Logic:</span>
+        <span className="text-sm text-ink-muted">Logic:</span>
         {(["AND", "OR"] as const).map((l) => (
           <button key={l} onClick={() => onChange({ ...value, logic: l })}
-            className={`px-3 py-1 rounded text-sm font-medium transition-colors ${value.logic === l ? "bg-violet-600 text-white" : "bg-slate-800 text-slate-400 hover:text-white"}`}>
+            className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${value.logic === l ? "bg-brand text-white" : "bg-surface-2 text-ink-muted hover:text-ink"}`}>
             {l}
           </button>
         ))}
       </div>
 
       <div>
-        <h4 className="text-sm font-semibold text-emerald-400 mb-3">Entry Rules</h4>
+        <h4 className="text-sm font-semibold text-positive mb-3 flex items-center gap-1.5">
+          <span className="h-1.5 w-1.5 rounded-full bg-positive" />
+          Entry Rules
+        </h4>
         <div className="space-y-2 mb-3">
           {value.entry.map((r, i) => <RuleCard key={i} rule={r} onDelete={() => delEntry(i)} />)}
         </div>
@@ -132,7 +135,10 @@ export default function VisualBuilder({ value, onChange }: Props) {
       </div>
 
       <div>
-        <h4 className="text-sm font-semibold text-red-400 mb-3">Exit Rules</h4>
+        <h4 className="text-sm font-semibold text-negative mb-3 flex items-center gap-1.5">
+          <span className="h-1.5 w-1.5 rounded-full bg-negative" />
+          Exit Rules
+        </h4>
         <div className="space-y-2 mb-3">
           {value.exit.map((r, i) => <RuleCard key={i} rule={r} onDelete={() => delExit(i)} />)}
         </div>

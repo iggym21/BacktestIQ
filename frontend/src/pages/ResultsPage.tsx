@@ -25,8 +25,8 @@ export default function ResultsPage() {
     return (
       <Layout>
         <div className="text-center py-20">
-          <p className="text-slate-400 mb-4">No results to display.</p>
-          <Link to="/strategy" className="text-violet-400 hover:text-violet-300">
+          <p className="text-ink-muted mb-4">No results to display.</p>
+          <Link to="/strategy" className="text-brand hover:text-brand-strong font-medium">
             Back to Strategy Builder
           </Link>
         </div>
@@ -61,24 +61,24 @@ export default function ResultsPage() {
   return (
     <Layout>
       <div className="max-w-6xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <h2 className="text-2xl font-bold text-white">
+            <h2 className="text-2xl font-bold text-ink font-mono">
               {ticker} — Backtest Results
             </h2>
-            <p className="text-slate-400 text-sm mt-1">{startDate} to {endDate}</p>
+            <p className="text-ink-muted text-sm mt-1">{startDate} to {endDate}</p>
           </div>
           <div className="flex gap-3">
             <button onClick={handleShare} disabled={sharing}
-              className="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
+              className="btn-secondary text-sm px-4 py-2">
               {sharing ? "Sharing…" : "Share"}
             </button>
             <button onClick={handleExport}
-              className="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+              className="btn-secondary text-sm px-4 py-2">
               Export PDF
             </button>
             <Link to="/strategy"
-              className="bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+              className="btn-primary text-sm px-4 py-2">
               New Backtest
             </Link>
           </div>

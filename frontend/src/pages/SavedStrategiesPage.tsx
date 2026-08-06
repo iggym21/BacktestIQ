@@ -58,45 +58,45 @@ export default function SavedStrategiesPage() {
     });
   };
 
-  if (loading) return <Layout><div className="text-center py-20 text-slate-400">Loading…</div></Layout>;
+  if (loading) return <Layout><div className="text-center py-20 text-ink-muted">Loading…</div></Layout>;
 
   return (
     <Layout>
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-white">Saved Strategies</h2>
-          <span className="text-sm text-slate-400">{strategies.length} / 10 used</span>
+          <h2 className="text-2xl font-bold text-ink">Saved Strategies</h2>
+          <span className="text-sm text-ink-muted font-mono">{strategies.length} / 10 used</span>
         </div>
 
         {strategies.length === 0 ? (
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-12 text-center">
-            <p className="text-slate-400 mb-4">No saved strategies yet.</p>
-            <a href="/strategy" className="text-violet-400 hover:text-violet-300 text-sm">
+          <div className="card p-12 text-center">
+            <p className="text-ink-muted mb-4">No saved strategies yet.</p>
+            <a href="/strategy" className="text-brand hover:text-brand-strong text-sm font-medium">
               Build your first strategy →
             </a>
           </div>
         ) : (
           <div className="grid gap-4">
             {strategies.map((s) => (
-              <div key={s.id} className="bg-slate-900 border border-slate-800 rounded-xl p-5 flex items-center justify-between">
+              <div key={s.id} className="card p-5 flex items-center justify-between flex-wrap gap-3">
                 <div>
-                  <h3 className="text-white font-semibold">{s.name}</h3>
+                  <h3 className="text-ink font-semibold">{s.name}</h3>
                   <div className="flex gap-3 mt-1">
-                    <span className="text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded capitalize">{s.mode}</span>
-                    <span className="text-xs text-slate-500">{new Date(s.created_at).toLocaleDateString()}</span>
+                    <span className="text-xs bg-surface-2 text-ink-muted px-2 py-0.5 rounded capitalize">{s.mode}</span>
+                    <span className="text-xs text-ink-faint font-mono">{new Date(s.created_at).toLocaleDateString()}</span>
                   </div>
                 </div>
                 <div className="flex gap-2">
                   <button onClick={() => handleLoad(s)}
-                    className="bg-violet-600 hover:bg-violet-700 text-white text-sm px-4 py-1.5 rounded-lg transition-colors">
+                    className="btn-primary text-sm px-4 py-1.5">
                     Load
                   </button>
                   <button onClick={() => handleShowHistory(s)}
-                    className="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white text-sm px-4 py-1.5 rounded-lg transition-colors">
+                    className="btn-secondary text-sm px-4 py-1.5">
                     History
                   </button>
                   <button onClick={() => handleDelete(s.id)}
-                    className="bg-slate-800 hover:bg-red-900/40 text-slate-400 hover:text-red-400 text-sm px-4 py-1.5 rounded-lg transition-colors">
+                    className="bg-surface-2 hover:bg-negative-soft text-ink-muted hover:text-negative text-sm px-4 py-1.5 rounded-lg transition-colors">
                     Delete
                   </button>
                 </div>
@@ -107,30 +107,30 @@ export default function SavedStrategiesPage() {
       </div>
 
       {historyStrategy && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 w-full max-w-lg max-h-[80vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="card p-6 w-full max-w-lg max-h-[80vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-white font-semibold">Version History — {historyStrategy.name}</h3>
-              <button onClick={() => setHistoryStrategy(null)} className="text-slate-400 hover:text-white text-sm">✕</button>
+              <h3 className="text-ink font-semibold">Version History — {historyStrategy.name}</h3>
+              <button onClick={() => setHistoryStrategy(null)} className="text-ink-muted hover:text-ink text-sm">✕</button>
             </div>
 
             {versions === null ? (
-              <p className="text-slate-400 text-sm py-6 text-center">Loading…</p>
+              <p className="text-ink-muted text-sm py-6 text-center">Loading…</p>
             ) : versions.length === 0 ? (
-              <p className="text-slate-400 text-sm py-6 text-center">No edits yet — this strategy hasn't been updated since it was created.</p>
+              <p className="text-ink-muted text-sm py-6 text-center">No edits yet — this strategy hasn't been updated since it was created.</p>
             ) : (
               <div className="space-y-2">
                 {versions.map((v) => (
-                  <div key={v.id} className="bg-slate-800 border border-slate-700 rounded-lg p-3 flex items-center justify-between">
+                  <div key={v.id} className="bg-surface-2 rounded-lg p-3 flex items-center justify-between">
                     <div>
-                      <p className="text-white text-sm font-medium">{v.name}</p>
+                      <p className="text-ink text-sm font-medium">{v.name}</p>
                       <div className="flex gap-2 mt-1">
-                        <span className="text-xs bg-slate-900 text-slate-400 px-2 py-0.5 rounded capitalize">{v.mode}</span>
-                        <span className="text-xs text-slate-500">{new Date(v.created_at).toLocaleString()}</span>
+                        <span className="text-xs bg-surface text-ink-muted px-2 py-0.5 rounded capitalize">{v.mode}</span>
+                        <span className="text-xs text-ink-faint font-mono">{new Date(v.created_at).toLocaleString()}</span>
                       </div>
                     </div>
                     <button onClick={() => handleRestoreVersion(historyStrategy.id, v)}
-                      className="bg-violet-600 hover:bg-violet-700 text-white text-xs px-3 py-1.5 rounded-lg transition-colors shrink-0">
+                      className="btn-primary text-xs px-3 py-1.5 shrink-0">
                       Restore
                     </button>
                   </div>
