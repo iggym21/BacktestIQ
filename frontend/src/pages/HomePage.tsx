@@ -45,6 +45,12 @@ export default function HomePage() {
           >
             Optimize Parameters
           </Link>
+          <Link
+            to="/walkforward"
+            className="bg-slate-800 hover:bg-slate-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors border border-slate-700"
+          >
+            Walk-Forward Validation
+          </Link>
         </div>
       </div>
 

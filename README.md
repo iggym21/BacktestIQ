@@ -7,7 +7,7 @@
 [![TypeScript](https://img.shields.io/badge/language-TypeScript-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/build-Vite_6-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
 [![Claude API](https://img.shields.io/badge/AI-Claude_API-D97757?logo=anthropic&logoColor=white)](https://www.anthropic.com/api)
-[![Tests](https://img.shields.io/badge/tests-50_passing-brightgreen)](#testing)
+[![Tests](https://img.shields.io/badge/tests-59_passing-brightgreen)](#testing)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
 ---
@@ -43,6 +43,9 @@ Built as both a personal research tool and a full-stack/quant portfolio piece.
 <tr>
 <td colspan="2"><img src="docs/screenshots/10-optimize-parameters.jpg" alt="Parameter optimization sweep"><br><sub>Optimize — sweep a rule parameter (e.g. SMA period) across a range, ranked by any metric</sub></td>
 </tr>
+<tr>
+<td colspan="2"><img src="docs/screenshots/11-walk-forward.jpg" alt="Walk-forward validation"><br><sub>Walk-Forward — split the range into folds, catch strategies that only work in one market regime (fold #3 here spans the COVID crash and goes negative)</sub></td>
+</tr>
 </table>
 
 ## Features
@@ -54,6 +57,7 @@ Built as both a personal research tool and a full-stack/quant portfolio piece.
 - **Analytics dashboard** — equity curve vs. buy-and-hold benchmark, drawdown chart, monthly returns heatmap, trade log, 13 performance metrics
 - **Multi-ticker comparison** — run one strategy across up to 5 tickers, overlaid normalized-return chart + side-by-side metrics table
 - **Parameter optimization** — sweep one rule parameter (e.g. a moving-average period) across a range, ranked by Sharpe/return/drawdown/Calmar
+- **Walk-forward validation** — split the date range into consecutive folds and run the same fixed strategy on each, surfacing regime-dependence that a single full-period backtest hides
 - **PDF tearsheet export** — one-click export of results via WeasyPrint
 - **Auth + saved strategies** — JWT-based accounts, save/revisit past strategies and runs
 - **Historical data** — free OHLCV via yfinance, cached server-side
@@ -82,7 +86,7 @@ BacktestIQ/
 │   │                          signal generation, portfolio simulation,
 │   │                          metrics, AI generation, PDF export
 │   ├── models/                User, Strategy, BacktestRun (SQLAlchemy)
-│   ├── tests/                  45 pytest tests: unit + end-to-end integration
+│   ├── tests/                  54 pytest tests: unit + end-to-end integration
 │   └── alembic/                DB migrations
 └── frontend/                 React + TypeScript SPA
     └── src/
@@ -96,7 +100,7 @@ BacktestIQ/
 
 ## Testing
 
-Backend: 45 pytest tests covering indicators, signal generation, portfolio simulation (including all three position-sizing modes), metrics, auth, data caching, and end-to-end integration tests of the backtest, compare, and parameter-sweep endpoints (register → login → run → verify response shape) with a stubbed data source so they never touch the network.
+Backend: 54 pytest tests covering indicators, signal generation, portfolio simulation (including all three position-sizing modes), metrics, auth, data caching, and end-to-end integration tests of the backtest, compare, parameter-sweep, and walk-forward endpoints (register → login → run → verify response shape) with a stubbed data source so they never touch the network.
 
 ```bash
 cd backend && pytest -q
@@ -159,7 +163,7 @@ SQLite is used by default in dev — no Docker required.
 
 - [x] Multi-ticker comparison
 - [x] Parameter optimization sweeps
-- [ ] Walk-forward validation
+- [x] Walk-forward validation
 - [ ] Alpaca paper trading integration
 - [ ] Shareable public result URLs
 - [ ] Strategy versioning

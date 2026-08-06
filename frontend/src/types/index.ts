@@ -129,6 +129,28 @@ export interface SweepResult {
   points: SweepPoint[];
 }
 
+export interface WalkForwardRequest {
+  ticker: string;
+  start_date: string;
+  end_date: string;
+  strategy: StrategyConfig;
+  initial_capital: number;
+  benchmark: string;
+  folds: number;
+}
+
+export interface WalkForwardFold {
+  fold: number;
+  start_date: string;
+  end_date: string;
+  metrics: BacktestMetrics | null;
+  error: string | null;
+}
+
+export interface WalkForwardResult {
+  folds: WalkForwardFold[];
+}
+
 export interface SavedStrategy {
   id: string;
   name: string;

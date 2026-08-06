@@ -14,6 +14,7 @@ const ResultsPage = lazy(() => import("./pages/ResultsPage"));
 const SavedStrategiesPage = lazy(() => import("./pages/SavedStrategiesPage"));
 const ComparePage = lazy(() => import("./pages/ComparePage"));
 const OptimizePage = lazy(() => import("./pages/OptimizePage"));
+const WalkForwardPage = lazy(() => import("./pages/WalkForwardPage"));
 
 function PageFallback() {
   return (
@@ -43,6 +44,7 @@ export default function App() {
             <Route path="/saved" element={<ProtectedRoute><SavedStrategiesPage /></ProtectedRoute>} />
             <Route path="/compare" element={<ProtectedRoute><ComparePage /></ProtectedRoute>} />
             <Route path="/optimize" element={<ProtectedRoute><OptimizePage /></ProtectedRoute>} />
+            <Route path="/walkforward" element={<ProtectedRoute><WalkForwardPage /></ProtectedRoute>} />
             <Route path="*" element={
               <div className="min-h-screen bg-slate-950 flex items-center justify-center">
                 <div className="text-center">

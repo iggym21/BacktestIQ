@@ -5,10 +5,11 @@ from database import get_db
 from schemas.backtest import (
     BacktestRequest, BacktestResponse, CompareRequest, CompareResponse, TickerResult,
     SweepRequest, SweepResponse, SweepPoint,
+    WalkForwardRequest, WalkForwardResponse, WalkForwardFold,
 )
 from services.backtest_service import (
-    run_strategy_backtest, run_parameter_sweep,
-    BacktestDataError, BacktestStrategyError, SweepConfigError,
+    run_strategy_backtest, run_parameter_sweep, run_walk_forward,
+    BacktestDataError, BacktestStrategyError, SweepConfigError, WalkForwardConfigError,
 )
 from routers.auth import get_current_user
 from models.backtest_run import BacktestRun
@@ -93,3 +94,21 @@ def sweep_backtest(
         raise HTTPException(status_code=404, detail=str(e))
 
     return SweepResponse(points=[SweepPoint(**p) for p in points])
+
+
+@router.post("/walkforward", response_model=WalkForwardResponse)
+def walk_forward_backtest(
+    req: WalkForwardRequest,
+    user=Depends(get_current_user),
+):
+    try:
+        folds = run_walk_forward(
+            req.ticker, req.start_date, req.end_date, req.strategy,
+            req.initial_capital, req.benchmark, req.folds,
+        )
+    except WalkForwardConfigError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except BacktestDataError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+    return WalkForwardResponse(folds=[WalkForwardFold(**f) for f in folds])

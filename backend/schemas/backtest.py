@@ -86,3 +86,25 @@ class SweepPoint(BaseModel):
 
 class SweepResponse(BaseModel):
     points: list[SweepPoint]
+
+
+class WalkForwardRequest(BaseModel):
+    ticker: str
+    start_date: str
+    end_date: str
+    strategy: StrategyPayload
+    initial_capital: float = 10000.0
+    benchmark: str = "SPY"
+    folds: int = 4
+
+
+class WalkForwardFold(BaseModel):
+    fold: int
+    start_date: str
+    end_date: str
+    metrics: dict[str, Any] | None = None
+    error: str | None = None
+
+
+class WalkForwardResponse(BaseModel):
+    folds: list[WalkForwardFold]

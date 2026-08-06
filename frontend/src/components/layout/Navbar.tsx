@@ -32,6 +32,9 @@ export default function Navbar() {
           <Link to="/optimize" className="text-slate-400 hover:text-white transition-colors">
             Optimize
           </Link>
+          <Link to="/walkforward" className="text-slate-400 hover:text-white transition-colors">
+            Walk-Forward
+          </Link>
         </div>
       </div>
       <div className="flex items-center gap-4">

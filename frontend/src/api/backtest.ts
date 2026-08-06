@@ -1,5 +1,8 @@
 import client from "./client";
-import type { BacktestResult, BacktestRequest, CompareRequest, CompareResult, SweepRequest, SweepResult } from "../types";
+import type {
+  BacktestResult, BacktestRequest, CompareRequest, CompareResult,
+  SweepRequest, SweepResult, WalkForwardRequest, WalkForwardResult,
+} from "../types";
 
 export const runBacktest = (req: BacktestRequest) =>
   client.post<BacktestResult>("/backtest/run", req);
@@ -9,6 +12,9 @@ export const compareBacktest = (req: CompareRequest) =>
 
 export const sweepBacktest = (req: SweepRequest) =>
   client.post<SweepResult>("/backtest/sweep", req);
+
+export const walkForwardBacktest = (req: WalkForwardRequest) =>
+  client.post<WalkForwardResult>("/backtest/walkforward", req);
 
 export const exportTearsheet = async (
   data: BacktestResult & { ticker: string; start_date: string; end_date: string }

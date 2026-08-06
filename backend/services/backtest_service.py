@@ -1,3 +1,4 @@
+from datetime import date, timedelta
 from typing import Any
 
 from schemas.backtest import StrategyPayload
@@ -7,6 +8,8 @@ from services.portfolio_simulator import simulate_portfolio, simulate_buy_and_ho
 from services.metrics import calculate_metrics
 
 MAX_SWEEP_POINTS = 20
+MIN_WALK_FORWARD_FOLDS = 2
+MAX_WALK_FORWARD_FOLDS = 12
 
 
 class BacktestDataError(Exception):
@@ -19,6 +22,10 @@ class BacktestStrategyError(Exception):
 
 class SweepConfigError(Exception):
     """Raised when the sweep request itself is malformed (bad rule index, too many points, etc)."""
+
+
+class WalkForwardConfigError(Exception):
+    """Raised when the walk-forward request itself is malformed (bad fold count, range too short, etc)."""
 
 
 def run_strategy_backtest(
@@ -148,3 +155,67 @@ def run_parameter_sweep(
             points.append({"value": value, "metrics": None, "error": str(e)})
 
     return points
+
+
+def _fold_date_ranges(start_date: str, end_date: str, folds: int) -> list[tuple[str, str]]:
+    if folds < MIN_WALK_FORWARD_FOLDS or folds > MAX_WALK_FORWARD_FOLDS:
+        raise WalkForwardConfigError(
+            f"folds must be between {MIN_WALK_FORWARD_FOLDS} and {MAX_WALK_FORWARD_FOLDS}"
+        )
+    start = date.fromisoformat(start_date)
+    end = date.fromisoformat(end_date)
+    if end <= start:
+        raise WalkForwardConfigError("end_date must be after start_date")
+
+    total_days = (end - start).days
+    if total_days < folds:
+        raise WalkForwardConfigError("Date range is too short for the requested number of folds")
+
+    fold_days = total_days // folds
+    ranges = []
+    cursor = start
+    for i in range(folds):
+        fold_end = end if i == folds - 1 else cursor + timedelta(days=fold_days)
+        ranges.append((cursor.isoformat(), fold_end.isoformat()))
+        cursor = fold_end
+    return ranges
+
+
+def run_walk_forward(
+    ticker: str,
+    start_date: str,
+    end_date: str,
+    strategy: StrategyPayload,
+    initial_capital: float,
+    benchmark: str,
+    folds: int,
+) -> list[dict]:
+    """Split the date range into `folds` equal, consecutive, non-overlapping
+    windows and run the same fixed strategy independently on each one (each
+    fold restarts at initial_capital, so folds are directly comparable).
+
+    This does not re-fit or re-optimize anything between folds — it's a
+    robustness check: a strategy whose Sharpe/return swings wildly fold to
+    fold is regime-dependent even if its full-period metrics look great.
+    Pair with the Optimize sweep to check whether a tuned parameter holds up
+    out of the window it was tuned on.
+    """
+    ranges = _fold_date_ranges(start_date, end_date, folds)
+
+    results = []
+    for i, (fold_start, fold_end) in enumerate(ranges, start=1):
+        try:
+            result = run_strategy_backtest(
+                ticker, fold_start, fold_end, strategy, initial_capital, benchmark,
+            )
+            results.append({
+                "fold": i, "start_date": fold_start, "end_date": fold_end,
+                "metrics": result["metrics"], "error": None,
+            })
+        except (BacktestDataError, BacktestStrategyError) as e:
+            results.append({
+                "fold": i, "start_date": fold_start, "end_date": fold_end,
+                "metrics": None, "error": str(e),
+            })
+
+    return results
