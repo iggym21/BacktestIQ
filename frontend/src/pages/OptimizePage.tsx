@@ -12,6 +12,8 @@ const DEFAULT_RULES: StrategyRuleSet = {
   logic: "AND",
 };
 
+const MAX_SWEEP_POINTS = 20; // must match backend's MAX_SWEEP_POINTS in services/backtest_service.py
+
 const METRIC_OPTIONS: { key: keyof BacktestMetrics; label: string; pct?: boolean }[] = [
   { key: "sharpe", label: "Sharpe Ratio" },
   { key: "total_return", label: "Total Return", pct: true },
@@ -65,6 +67,10 @@ export default function OptimizePage() {
     if (rangeStop < rangeStart) return toast.error("Range stop must be >= start");
     if (rangeStep <= 0) return toast.error("Step must be positive");
     if (new Date(startDate) >= new Date(endDate)) return toast.error("Start date must be before end date");
+    const pointCount = Math.floor((rangeStop - rangeStart) / rangeStep) + 1;
+    if (pointCount > MAX_SWEEP_POINTS) {
+      return toast.error(`That range would run ${pointCount} backtests — maximum is ${MAX_SWEEP_POINTS}. Widen the step or narrow the range.`);
+    }
 
     setLoading(true);
     setPoints(null);
