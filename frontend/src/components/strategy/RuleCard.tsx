@@ -22,6 +22,7 @@ export default function RuleCard({ rule, onDelete }: Props) {
       </span>
       <button
         onClick={onDelete}
+        aria-label="Delete rule"
         className="text-slate-500 hover:text-red-400 ml-4 text-xs transition-colors"
       >
         ✕

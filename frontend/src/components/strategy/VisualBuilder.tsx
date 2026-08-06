@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import type { StrategyRule, StrategyRuleSet } from "../../types";
 import RuleCard from "./RuleCard";
 
@@ -44,30 +44,33 @@ function RuleFormRow({ onAdd }: { onAdd: (r: StrategyRule) => void }) {
   const [form, setForm] = useState<RuleForm>(defaultForm());
   const set = (k: keyof RuleForm, v: string) => setForm((f) => ({ ...f, [k]: v }));
   const needsPeriod = (ind: string) => ["SMA", "EMA", "RSI"].includes(ind);
+  // VisualBuilder renders two RuleFormRow instances at once (entry + exit),
+  // so static ids would collide — useId() gives each instance its own prefix.
+  const uid = useId();
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-2 items-end">
       <div>
-        <label className="block text-xs text-slate-400 mb-1">Indicator</label>
-        <select value={form.indicator} onChange={(e) => set("indicator", e.target.value)}
+        <label htmlFor={`${uid}-indicator`} className="block text-xs text-slate-400 mb-1">Indicator</label>
+        <select id={`${uid}-indicator`} value={form.indicator} onChange={(e) => set("indicator", e.target.value)}
           className="w-full bg-slate-800 border border-slate-700 text-white rounded px-2 py-1.5 text-sm">
           {INDICATORS.map((i) => <option key={i}>{i}</option>)}
         </select>
         {needsPeriod(form.indicator) && (
-          <input type="number" value={form.period} onChange={(e) => set("period", e.target.value)}
+          <input type="number" aria-label="Period" value={form.period} onChange={(e) => set("period", e.target.value)}
             placeholder="Period" className="mt-1 w-full bg-slate-800 border border-slate-700 text-white rounded px-2 py-1.5 text-sm" />
         )}
       </div>
       <div>
-        <label className="block text-xs text-slate-400 mb-1">Operator</label>
-        <select value={form.operator} onChange={(e) => set("operator", e.target.value)}
+        <label htmlFor={`${uid}-operator`} className="block text-xs text-slate-400 mb-1">Operator</label>
+        <select id={`${uid}-operator`} value={form.operator} onChange={(e) => set("operator", e.target.value)}
           className="w-full bg-slate-800 border border-slate-700 text-white rounded px-2 py-1.5 text-sm">
           {OPERATORS.map((o) => <option key={o}>{o}</option>)}
         </select>
       </div>
       <div>
-        <label className="block text-xs text-slate-400 mb-1">Target type</label>
-        <select value={form.targetType} onChange={(e) => set("targetType", e.target.value as "value" | "indicator")}
+        <label htmlFor={`${uid}-target-type`} className="block text-xs text-slate-400 mb-1">Target type</label>
+        <select id={`${uid}-target-type`} value={form.targetType} onChange={(e) => set("targetType", e.target.value as "value" | "indicator")}
           className="w-full bg-slate-800 border border-slate-700 text-white rounded px-2 py-1.5 text-sm">
           <option value="value">Fixed value</option>
           <option value="indicator">Indicator</option>
@@ -76,19 +79,19 @@ function RuleFormRow({ onAdd }: { onAdd: (r: StrategyRule) => void }) {
       <div>
         {form.targetType === "value" ? (
           <>
-            <label className="block text-xs text-slate-400 mb-1">Value</label>
-            <input type="number" value={form.targetValue} onChange={(e) => set("targetValue", e.target.value)}
+            <label htmlFor={`${uid}-target-value`} className="block text-xs text-slate-400 mb-1">Value</label>
+            <input id={`${uid}-target-value`} type="number" value={form.targetValue} onChange={(e) => set("targetValue", e.target.value)}
               className="w-full bg-slate-800 border border-slate-700 text-white rounded px-2 py-1.5 text-sm" />
           </>
         ) : (
           <>
-            <label className="block text-xs text-slate-400 mb-1">Indicator</label>
-            <select value={form.targetIndicator} onChange={(e) => set("targetIndicator", e.target.value)}
+            <label htmlFor={`${uid}-target-indicator`} className="block text-xs text-slate-400 mb-1">Indicator</label>
+            <select id={`${uid}-target-indicator`} value={form.targetIndicator} onChange={(e) => set("targetIndicator", e.target.value)}
               className="w-full bg-slate-800 border border-slate-700 text-white rounded px-2 py-1.5 text-sm">
               {INDICATORS.map((i) => <option key={i}>{i}</option>)}
             </select>
             {needsPeriod(form.targetIndicator) && (
-              <input type="number" value={form.targetPeriod} onChange={(e) => set("targetPeriod", e.target.value)}
+              <input type="number" aria-label="Target period" value={form.targetPeriod} onChange={(e) => set("targetPeriod", e.target.value)}
                 placeholder="Period" className="mt-1 w-full bg-slate-800 border border-slate-700 text-white rounded px-2 py-1.5 text-sm" />
             )}
           </>
