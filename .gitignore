@@ -8,5 +8,11 @@ market_data_cache.db
 *.egg-info/
 dist/
 .DS_Store
-graphify-out/cache/
-graphify-out/.*
+tearsheet_*.pdf
+
+# Planning / process artifacts — kept locally, not part of the shipped product
+BacktestIQ_PRD.md
+SESSION_NOTES.md
+docs/superpowers/
+docs/OVERNIGHT_PROGRESS.md
+graphify-out/

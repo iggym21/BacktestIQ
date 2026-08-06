@@ -7,7 +7,8 @@
 [![TypeScript](https://img.shields.io/badge/language-TypeScript-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/build-Vite_6-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
 [![Claude API](https://img.shields.io/badge/AI-Claude_API-D97757?logo=anthropic&logoColor=white)](https://www.anthropic.com/api)
-[![License](https://img.shields.io/badge/license-Unlicensed-lightgrey)](#)
+[![Tests](https://img.shields.io/badge/backend_tests-27_passing-brightgreen)](#testing)
+[![License](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
 ---
 
@@ -17,13 +18,34 @@ BacktestIQ lets you define a trading strategy two ways — a **visual rule build
 
 Built as both a personal research tool and a full-stack/quant portfolio piece.
 
+## Screenshots
+
+<table>
+<tr>
+<td width="50%"><img src="docs/screenshots/02-home.jpg" alt="Home page"><br><sub>Home</sub></td>
+<td width="50%"><img src="docs/screenshots/01-login.jpg" alt="Login page"><br><sub>Auth</sub></td>
+</tr>
+<tr>
+<td width="50%"><img src="docs/screenshots/03-strategy-builder-visual.jpg" alt="Visual strategy builder"><br><sub>Visual rule builder — indicator, operator, target, entry/exit</sub></td>
+<td width="50%"><img src="docs/screenshots/06-code-editor.jpg" alt="Python code editor"><br><sub>Code mode — Monaco editor with a working <code>generate_signals(df)</code> template</sub></td>
+</tr>
+<tr>
+<td width="50%"><img src="docs/screenshots/04-results-dashboard.jpg" alt="Results dashboard"><br><sub>Results — 13 metrics + equity curve vs. buy-and-hold benchmark</sub></td>
+<td width="50%"><img src="docs/screenshots/05-drawdown-heatmap-tradelog.jpg" alt="Drawdown, monthly heatmap, and trade log"><br><sub>Drawdown chart, monthly returns heatmap, full trade log</sub></td>
+</tr>
+<tr>
+<td width="50%"><img src="docs/screenshots/07-ai-generator.jpg" alt="AI strategy generator"><br><sub>AI generator — plain English → strategy config via Claude</sub></td>
+<td width="50%"><img src="docs/screenshots/08-saved-strategies.jpg" alt="Saved strategies list"><br><sub>Saved strategies — load, rerun, or delete past strategies</sub></td>
+</tr>
+</table>
+
 ## Features
 
 - **Visual strategy builder** — SMA, EMA, RSI, MACD, Bollinger Bands, volume; combine conditions with AND/OR; fixed $, fixed shares, or % position sizing
 - **Code mode** — write a `generate_signals(df)` strategy in Python with a Monaco editor
 - **AI strategy generator** — describe a strategy in English, Claude turns it into a runnable config
 - **Vectorized backtest engine** — pandas/numpy-based simulation with long-only and long/short support
-- **Analytics dashboard** — equity curve, drawdown chart, monthly returns heatmap, trade log, 13 performance metrics
+- **Analytics dashboard** — equity curve vs. buy-and-hold benchmark, drawdown chart, monthly returns heatmap, trade log, 13 performance metrics
 - **PDF tearsheet export** — one-click export of results via WeasyPrint
 - **Auth + saved strategies** — JWT-based accounts, save/revisit past strategies and runs
 - **Historical data** — free OHLCV via yfinance, cached server-side
@@ -40,6 +62,7 @@ Built as both a personal research tool and a full-stack/quant portfolio piece.
 | Frontend | React 19, TypeScript, Vite 6, Tailwind CSS 4 |
 | Frontend libs | React Router 7, Recharts, Monaco Editor, Axios |
 | Database | SQLite (dev) / PostgreSQL (prod, via docker-compose) |
+| CI | GitHub Actions — backend pytest + frontend typecheck/build on every push |
 
 ## Architecture
 
@@ -51,6 +74,7 @@ BacktestIQ/
 │   │                          signal generation, portfolio simulation,
 │   │                          metrics, AI generation, PDF export
 │   ├── models/                User, Strategy, BacktestRun (SQLAlchemy)
+│   ├── tests/                  27 pytest tests: unit + end-to-end integration
 │   └── alembic/                DB migrations
 └── frontend/                 React + TypeScript SPA
     └── src/
@@ -59,6 +83,18 @@ BacktestIQ/
         ├── api/                 typed API client (Axios + JWT interceptor)
         └── context/             auth state
 ```
+
+**Request flow for a backtest run:** the frontend posts ticker/date-range/strategy config to `POST /backtest/run` → the backend fetches (and caches) OHLCV data → generates buy/sell signals from either the visual rule tree or the submitted Python code → simulates the portfolio bar-by-bar → simulates a buy-and-hold benchmark over the same period → computes 13 performance metrics (including alpha/beta via linear regression against the benchmark) → persists the run and returns the full result set for the dashboard.
+
+## Testing
+
+Backend: 27 pytest tests covering indicators, signal generation, portfolio simulation, metrics, auth, data caching, and a full end-to-end integration test of the backtest endpoint (register → login → run → verify response shape) with a stubbed data source so it never touches the network.
+
+```bash
+cd backend && pytest -q
+```
+
+Frontend: TypeScript strict mode + `tsc --noEmit` in CI; manually verified end-to-end (register, both strategy modes, save/load, PDF export, AI generator failure path) during development.
 
 ## Getting started
 
@@ -81,9 +117,7 @@ cd backend
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 alembic upgrade head
-
-# macOS: WeasyPrint needs pango/gobject on the dyld path
-DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib uvicorn main:app --reload
+uvicorn main:app --reload
 ```
 API docs at `http://localhost:8000/docs`.
 
@@ -105,7 +139,8 @@ SQLite is used by default in dev — no Docker required.
 ## Notes
 
 - Dev machine pinned to **Vite 6** (Node 20.15 doesn't meet Vite 8's 20.19+ requirement) — bump `vite` back to `^8` after upgrading Node.
-- `ANTHROPIC_API_KEY` is required for the AI strategy generator; the rest of the app works without it.
+- `ANTHROPIC_API_KEY` is required for the AI strategy generator; the rest of the app works without it, and a missing key fails gracefully with an in-app error rather than crashing.
+- PDF export needs pango/cairo/gobject on the system (`brew install pango cairo libffi` on macOS, `apt install libpango-1.0-0 libpangoft2-1.0-0 libcairo2` on Debian/Ubuntu). No manual environment variable setup is required — the backend locates the libraries itself at runtime.
 - Alpaca keys are wired into config for a future paper-trading feature but aren't required — historical data currently comes from yfinance.
 
 ## Roadmap
