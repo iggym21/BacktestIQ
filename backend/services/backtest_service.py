@@ -57,7 +57,10 @@ def run_strategy_backtest(
             "exit": [r.model_dump() for r in strategy.rules.exit],
             "logic": strategy.rules.logic,
         }
-        signals = generate_signals_from_rules(df, rules_dict)
+        try:
+            signals = generate_signals_from_rules(df, rules_dict)
+        except (ValueError, KeyError, TypeError) as e:
+            raise BacktestStrategyError(f"Invalid rule: {str(e)}") from e
     else:
         if not strategy.code:
             raise BacktestStrategyError("Code mode requires code")

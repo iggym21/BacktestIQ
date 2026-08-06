@@ -80,6 +80,47 @@ def test_run_backtest_rejects_non_positive_initial_capital(bad_capital):
     assert resp.status_code == 422
 
 
+def test_run_backtest_rejects_invalid_indicator_params_cleanly():
+    """A malformed rule (bad indicator params, unknown indicator/operator, or
+    a target with neither 'value' nor 'indicator') used to raise a raw
+    ValueError/KeyError straight out of signal_generator with no try/except
+    around the visual-mode path (unlike code mode, which already had one) —
+    surfacing as an unhandled 500. Confirmed live against the running dev
+    server before this fix: negative SMA period crashed with a raw pandas
+    "window must be an integer 0 or greater" 500."""
+    headers = _auth_headers()
+    payload = {
+        "ticker": "SPY", "start_date": "2022-01-01", "end_date": "2022-03-01",
+        "benchmark": "SPY", "initial_capital": 10000,
+        "strategy": {
+            "mode": "visual",
+            "rules": {
+                "entry": [{"indicator": "SMA", "params": {"period": -5}, "operator": ">", "target": {"value": 0}}],
+                "exit": [], "logic": "AND",
+            },
+        },
+    }
+    resp = client.post("/backtest/run", json=payload, headers=headers)
+    assert resp.status_code == 400, resp.text
+
+
+def test_run_backtest_rejects_target_missing_value_and_indicator():
+    headers = _auth_headers()
+    payload = {
+        "ticker": "SPY", "start_date": "2022-01-01", "end_date": "2022-03-01",
+        "benchmark": "SPY", "initial_capital": 10000,
+        "strategy": {
+            "mode": "visual",
+            "rules": {
+                "entry": [{"indicator": "SMA", "params": {"period": 20}, "operator": ">", "target": {}}],
+                "exit": [], "logic": "AND",
+            },
+        },
+    }
+    resp = client.post("/backtest/run", json=payload, headers=headers)
+    assert resp.status_code == 400, resp.text
+
+
 def test_run_backtest_requires_auth():
     payload = {
         "ticker": "SPY", "start_date": "2022-01-01", "end_date": "2022-03-01",
