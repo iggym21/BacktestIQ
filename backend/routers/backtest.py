@@ -1,3 +1,4 @@
+from datetime import date
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database import get_db
@@ -65,8 +66,8 @@ def run_backtest(
     run = BacktestRun(
         user_id=user.id,
         ticker=req.ticker,
-        start_date=req.start_date,
-        end_date=req.end_date,
+        start_date=date.fromisoformat(req.start_date),
+        end_date=date.fromisoformat(req.end_date),
         initial_capital=req.initial_capital,
         benchmark=req.benchmark,
         metrics=metrics,
