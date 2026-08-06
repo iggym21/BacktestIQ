@@ -10,3 +10,5 @@ export const login = (email: string, password: string) => {
   form.append("password", password);
   return client.post<AuthTokens>("/auth/login", form);
 };
+
+export const getMe = () => client.get<User>("/auth/me");

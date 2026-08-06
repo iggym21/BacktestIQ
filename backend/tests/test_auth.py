@@ -35,3 +35,19 @@ def test_register_rejects_password_shorter_than_eight_characters():
 def test_register_rejects_empty_password():
     resp = client.post("/auth/register", json={"email": "emptypw@test.com", "password": ""})
     assert resp.status_code == 422
+
+def test_me_returns_the_authenticated_user():
+    register_resp = client.post("/auth/register", json={"email": "me@test.com", "password": "password123"})
+    registered_id = register_resp.json()["id"]
+
+    login_resp = client.post("/auth/login", data={"username": "me@test.com", "password": "password123"})
+    token = login_resp.json()["access_token"]
+
+    me_resp = client.get("/auth/me", headers={"Authorization": f"Bearer {token}"})
+    assert me_resp.status_code == 200
+    assert me_resp.json()["id"] == registered_id
+    assert me_resp.json()["email"] == "me@test.com"
+
+def test_me_requires_auth():
+    resp = client.get("/auth/me")
+    assert resp.status_code == 401

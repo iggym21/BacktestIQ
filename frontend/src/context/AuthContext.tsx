@@ -21,9 +21,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     const { data: tokens } = await authApi.login(email, password);
     localStorage.setItem("access_token", tokens.access_token);
-    const mockUser: User = { id: "", email };
-    localStorage.setItem("user", JSON.stringify(mockUser));
-    setUser(mockUser);
+    // The token response has no user info; fetch the real record rather
+    // than fabricating one — nothing reads user.id today, but a stubbed
+    // empty id is a landmine for whoever adds the first feature that does.
+    const { data: me } = await authApi.getMe();
+    localStorage.setItem("user", JSON.stringify(me));
+    setUser(me);
   };
 
   const register = async (email: string, password: string) => {
