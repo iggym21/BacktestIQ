@@ -7,6 +7,13 @@ interface Props {
   trades: Trade[];
 }
 
+/** Exported for direct unit testing — Recharts only invokes this on hover,
+ * which jsdom can't reliably simulate for SVG chart internals. Regression
+ * guard for a bug where both series' tooltip rows showed the same label. */
+export function formatTooltipValue(value: unknown, name: string): [string, string] {
+  return [`$${typeof value === "number" ? value.toLocaleString() : value}`, name];
+}
+
 export default function EquityCurve({ data, trades }: Props) {
   const [showBenchmark, setShowBenchmark] = useState(true);
 
@@ -33,7 +40,7 @@ export default function EquityCurve({ data, trades }: Props) {
           <XAxis dataKey="date" tick={{ fill: "#64748b", fontSize: 11 }} tickLine={false} />
           <YAxis tick={{ fill: "#64748b", fontSize: 11 }} tickLine={false} tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}k`} />
           <Tooltip contentStyle={{ background: "#0f172a", border: "1px solid #1e293b", color: "#fff" }}
-            formatter={(v, name) => [`$${typeof v === "number" ? v.toLocaleString() : v}`, name]} />
+            formatter={(value, name) => formatTooltipValue(value, String(name))} />
           <Line type="monotone" dataKey="equity" stroke="#7c3aed" strokeWidth={2} dot={false} name="Strategy" />
           {showBenchmark && (
             <Line type="monotone" dataKey="benchmark_equity" stroke="#475569" strokeWidth={1.5} dot={false} name="Benchmark" strokeDasharray="4 2" />
