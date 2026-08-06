@@ -7,7 +7,7 @@
 [![TypeScript](https://img.shields.io/badge/language-TypeScript-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/build-Vite_6-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
 [![Claude API](https://img.shields.io/badge/AI-Claude_API-D97757?logo=anthropic&logoColor=white)](https://www.anthropic.com/api)
-[![Tests](https://img.shields.io/badge/tests-98_passing-brightgreen)](#testing)
+[![Tests](https://img.shields.io/badge/tests-101_passing-brightgreen)](#testing)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
 ---
@@ -113,7 +113,7 @@ Backend: 90 pytest tests — every service module has direct or integration cove
 cd backend && pytest -q
 ```
 
-Frontend: Vitest + React Testing Library for component behavior, TypeScript strict mode + `tsc --noEmit`. Both run in CI on every push.
+Frontend: 11 Vitest tests covering component behavior (regression guards for the tooltip-label and heatmap-color bugs fixed this session, position-sizing form logic) and the axios 401 → redirect-to-login decision logic, plus TypeScript strict mode. Both run in CI on every push.
 
 ```bash
 cd frontend && npm test
