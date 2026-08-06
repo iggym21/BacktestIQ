@@ -39,7 +39,7 @@ For target: use {"value": N} for numeric threshold, or {"indicator": "...", "par
 
 def generate_strategy(description: str) -> dict:
     message = _client.messages.create(
-        model="claude-sonnet-4-6",
+        model="claude-sonnet-5",
         max_tokens=1024,
         system=SYSTEM_PROMPT,
         messages=[{"role": "user", "content": description}],
@@ -50,5 +50,8 @@ def generate_strategy(description: str) -> dict:
     except json.JSONDecodeError:
         match = re.search(r"\{.*\}", text, re.DOTALL)
         if match:
-            return json.loads(match.group())
+            try:
+                return json.loads(match.group())
+            except json.JSONDecodeError:
+                pass
         raise ValueError("Could not parse strategy from AI response")

@@ -43,6 +43,21 @@ def test_generate_strategy_raises_when_response_has_no_json(monkeypatch):
         ai_service.generate_strategy("gibberish request")
 
 
+def test_generate_strategy_raises_cleanly_on_multiple_json_blocks(monkeypatch):
+    """The regex fallback is greedy (first '{' to last '}'), so a response with
+    two separate JSON-ish blocks (e.g. an inline example plus the real answer)
+    produces a malformed merged blob. That must still surface as the same
+    clean ValueError, not a raw json.JSONDecodeError leaking the parser's
+    internal message."""
+    text = 'For example {"a": 1} but the real answer is {"mode": "visual"}'
+    fake_client = MagicMock()
+    fake_client.messages.create.return_value = _mock_response(text)
+    monkeypatch.setattr(ai_service, "_client", fake_client)
+
+    with pytest.raises(ValueError, match="Could not parse strategy"):
+        ai_service.generate_strategy("some description")
+
+
 def test_generate_strategy_sends_the_description_to_the_model(monkeypatch):
     fake_client = MagicMock()
     fake_client.messages.create.return_value = _mock_response('{"mode": "visual"}')
