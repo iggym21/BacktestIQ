@@ -28,6 +28,18 @@ function stdev(values: number[]): number {
   return Math.sqrt(variance);
 }
 
+/** Whether "at least one fold lost money" must always be judged by
+ * total_return specifically, never by whichever metric happens to be
+ * selected for the chart: max_drawdown is <= 0 by definition (any equity
+ * curve dips from its peak at some point), so using it here would flag
+ * every run as a loss regardless of actual profitability; win_rate is
+ * always >= 0, so it would never flag a loss even when every fold lost
+ * money outright. */
+export function anyFoldLostMoney(folds: WalkForwardFold[]): boolean {
+  const returns = folds.filter((f) => f.metrics).map((f) => f.metrics!.total_return);
+  return returns.length > 0 && Math.min(...returns) < 0;
+}
+
 export default function WalkForwardPage() {
   const [ticker, setTicker] = useState("SPY");
   const [startDate, setStartDate] = useState("2018-01-01");
@@ -75,6 +87,7 @@ export default function WalkForwardPage() {
   const values = chartData.map((d) => d.metric);
   const consistency = stdev(values);
   const worst = values.length > 0 ? Math.min(...values) : null;
+  const lostMoney = anyFoldLostMoney(result ?? []);
 
   return (
     <Layout>
@@ -144,10 +157,10 @@ export default function WalkForwardPage() {
         {result && (
           <div className="space-y-6">
             {worst !== null && (
-              <div className={`border rounded-xl p-4 text-sm ${worst < 0 ? "bg-red-950/40 border-red-800 text-red-300" : "bg-emerald-950/40 border-emerald-800 text-emerald-300"}`}>
+              <div className={`border rounded-xl p-4 text-sm ${lostMoney ? "bg-red-950/40 border-red-800 text-red-300" : "bg-emerald-950/40 border-emerald-800 text-emerald-300"}`}>
                 {metric.label} ranged from <span className="font-semibold">{metric.pct ? `${Math.min(...values).toFixed(2)}%` : Math.min(...values).toFixed(3)}</span> to{" "}
                 <span className="font-semibold">{metric.pct ? `${Math.max(...values).toFixed(2)}%` : Math.max(...values).toFixed(3)}</span> across folds
-                (std dev {metric.pct ? `${consistency.toFixed(2)}%` : consistency.toFixed(3)}) — {worst < 0 ? "at least one fold lost money" : "consistently positive across folds"}.
+                (std dev {metric.pct ? `${consistency.toFixed(2)}%` : consistency.toFixed(3)}) — {lostMoney ? "at least one fold lost money" : "consistently positive across folds"}.
               </div>
             )}
 
