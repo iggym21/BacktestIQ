@@ -57,7 +57,7 @@ function RuleFormRow({ onAdd }: { onAdd: (r: StrategyRule) => void }) {
           {INDICATORS.map((i) => <option key={i}>{i}</option>)}
         </select>
         {needsPeriod(form.indicator) && (
-          <input type="number" aria-label="Period" value={form.period} onChange={(e) => set("period", e.target.value)}
+          <input type="number" min="1" aria-label="Period" value={form.period} onChange={(e) => set("period", e.target.value)}
             placeholder="Period" className="mt-1 w-full bg-slate-800 border border-slate-700 text-white rounded px-2 py-1.5 text-sm" />
         )}
       </div>
@@ -91,7 +91,7 @@ function RuleFormRow({ onAdd }: { onAdd: (r: StrategyRule) => void }) {
               {INDICATORS.map((i) => <option key={i}>{i}</option>)}
             </select>
             {needsPeriod(form.targetIndicator) && (
-              <input type="number" aria-label="Target period" value={form.targetPeriod} onChange={(e) => set("targetPeriod", e.target.value)}
+              <input type="number" min="1" aria-label="Target period" value={form.targetPeriod} onChange={(e) => set("targetPeriod", e.target.value)}
                 placeholder="Period" className="mt-1 w-full bg-slate-800 border border-slate-700 text-white rounded px-2 py-1.5 text-sm" />
             )}
           </>
