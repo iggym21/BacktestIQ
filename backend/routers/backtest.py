@@ -4,7 +4,7 @@ from database import get_db
 from schemas.backtest import BacktestRequest, BacktestResponse
 from services.data_service import fetch_ohlcv
 from services.signal_generator import generate_signals_from_rules, generate_signals_from_code
-from services.portfolio_simulator import simulate_portfolio
+from services.portfolio_simulator import simulate_portfolio, simulate_buy_and_hold
 from services.metrics import calculate_metrics
 from routers.auth import get_current_user
 from models.backtest_run import BacktestRun
@@ -42,8 +42,7 @@ def run_backtest(
             raise HTTPException(status_code=400, detail=f"Code error: {str(e)}")
 
     result = simulate_portfolio(df, signals, req.initial_capital)
-    bench_signals = signals * 0
-    bench_result = simulate_portfolio(benchmark_df, bench_signals, req.initial_capital)
+    bench_result = simulate_buy_and_hold(benchmark_df, req.initial_capital)
 
     metrics = calculate_metrics(
         result["equity_curve"],

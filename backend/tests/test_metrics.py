@@ -32,3 +32,22 @@ def test_total_return_positive_on_growth(equity_curve, benchmark_curve):
     m = calculate_metrics(equity_curve, benchmark_curve, trades, 10000)
     if equity_curve.iloc[-1] > 10000:
         assert m["total_return"] > 0
+
+def test_metrics_handles_flat_benchmark_without_crashing(equity_curve):
+    """Regression test: a benchmark with zero variance (e.g. no trades taken)
+    used to crash scipy.stats.linregress with 'all x values are identical'.
+    """
+    flat_benchmark = pd.Series(10000.0, index=equity_curve.index)
+    trades = []
+    m = calculate_metrics(equity_curve, flat_benchmark, trades, 10000)
+    assert m["beta"] == 0.0
+    assert m["alpha"] == 0.0
+
+def test_metrics_handles_flat_equity_without_crashing(benchmark_curve):
+    """A strategy that takes zero trades has a constant equity curve;
+    alpha/beta must still compute against a benchmark with real variance."""
+    flat_equity = pd.Series(10000.0, index=benchmark_curve.index)
+    trades = []
+    m = calculate_metrics(flat_equity, benchmark_curve, trades, 10000)
+    assert m["total_return"] == 0.0
+    assert isinstance(m["beta"], float)

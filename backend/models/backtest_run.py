@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 from sqlalchemy import String, DateTime, Date, Float, JSON, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from database import Base
@@ -19,6 +19,6 @@ class BacktestRun(Base):
     initial_capital: Mapped[float] = mapped_column(Float, nullable=False)
     benchmark: Mapped[str] = mapped_column(String, default="SPY")
     metrics: Mapped[dict | None] = mapped_column(JSON, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     user: Mapped["User"] = relationship(back_populates="backtest_runs")

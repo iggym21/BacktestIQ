@@ -1,7 +1,7 @@
 import pytest
 import pandas as pd
 import numpy as np
-from services.portfolio_simulator import simulate_portfolio
+from services.portfolio_simulator import simulate_portfolio, simulate_buy_and_hold
 
 @pytest.fixture
 def ohlcv():
@@ -33,3 +33,32 @@ def test_no_trades_means_flat_equity(ohlcv):
     signals = pd.Series(0, index=ohlcv.index)
     result = simulate_portfolio(ohlcv, signals, 10000)
     assert result["equity_curve"].iloc[-1] == pytest.approx(10000, rel=0.001)
+
+def test_buy_and_hold_tracks_price_return(ohlcv):
+    """Regression test: benchmark used to be simulated with all-zero signals
+    (never buys), producing a flat equity curve regardless of price movement."""
+    result = simulate_buy_and_hold(ohlcv, 10000)
+    price_return = ohlcv["close"].iloc[-1] / ohlcv["close"].iloc[0] - 1
+    equity_return = result["equity_curve"].iloc[-1] / 10000 - 1
+    assert equity_return == pytest.approx(price_return, rel=0.001)
+    assert len(result["trades"]) == 1
+    assert result["trades"][0]["type"] == "buy"
+
+def test_full_buy_sell_roundtrip_conserves_value():
+    """Regression test: buying used to leave cash un-deducted, so equity while
+    holding a position was cash + position value double-counted."""
+    prices = [100.0, 110.0, 120.0]
+    df = pd.DataFrame({"close": prices}, index=pd.date_range("2022-01-01", periods=3, freq="D"))
+    signals = pd.Series([1, 0, -1], index=df.index)
+    result = simulate_portfolio(df, signals, 10000)
+    equity = result["equity_curve"]
+    # Bought fully at 100 -> equity while holding should track price, not double it.
+    assert equity.iloc[1] == pytest.approx(11000, rel=0.001)
+    # Sold at 120 -> cash equals shares * final price.
+    assert equity.iloc[2] == pytest.approx(12000, rel=0.001)
+    assert result["trades"][-1]["pnl"] == pytest.approx(2000, rel=0.001)
+
+def test_buy_and_hold_empty_df_returns_no_trades():
+    empty = pd.DataFrame({"close": []}, index=pd.DatetimeIndex([]))
+    result = simulate_buy_and_hold(empty, 10000)
+    assert result["trades"] == []

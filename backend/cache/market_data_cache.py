@@ -1,7 +1,7 @@
 import sqlite3
 import json
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timezone
 from config import settings
 
 def _get_conn():
@@ -37,7 +37,7 @@ def set_cached(ticker: str, start: str, end: str, df: pd.DataFrame):
     conn = _get_conn()
     conn.execute(
         "INSERT OR REPLACE INTO ohlcv_cache VALUES (?,?,?,?,?)",
-        (ticker, start, end, data, datetime.utcnow().isoformat())
+        (ticker, start, end, data, datetime.now(timezone.utc).isoformat())
     )
     conn.commit()
     conn.close()

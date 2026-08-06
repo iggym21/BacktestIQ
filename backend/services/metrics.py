@@ -40,7 +40,7 @@ def calculate_metrics(equity: pd.Series, benchmark: pd.Series,
     avg_loss = np.mean([t["pnl"] for t in losing]) if losing else 0
 
     aligned = pd.concat([returns, bench_returns], axis=1).dropna()
-    if len(aligned) > 2:
+    if len(aligned) > 2 and aligned.iloc[:, 1].std() > 0:
         slope, intercept, _, _, _ = stats.linregress(aligned.iloc[:, 1], aligned.iloc[:, 0])
         beta = slope
         alpha = (annualized_return - beta * ((1 + bench_returns.mean()) ** TRADING_DAYS - 1))

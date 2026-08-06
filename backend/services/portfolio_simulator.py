@@ -15,11 +15,12 @@ def simulate_portfolio(df: pd.DataFrame, signals: pd.Series, initial_capital: fl
         price = row["close"]
 
         if sig == 1 and position == 0:
-            shares = equity / price
-            cost = shares * price * commission_pct
+            cost = equity * commission_pct
+            investable = equity - cost
+            shares = investable / price
             position = shares
             entry_price = price
-            equity -= cost
+            equity = 0.0
             trades.append({"date": str(date.date()), "type": "buy", "price": price,
                            "shares": shares, "pnl": 0.0})
 
@@ -46,3 +47,11 @@ def simulate_portfolio(df: pd.DataFrame, signals: pd.Series, initial_capital: fl
         "drawdown": drawdown,
         "trades": trades,
     }
+
+
+def simulate_buy_and_hold(df: pd.DataFrame, initial_capital: float) -> dict[str, Any]:
+    """Buy on the first bar and hold to the end — the standard benchmark comparison."""
+    signals = pd.Series(0, index=df.index)
+    if len(signals) > 0:
+        signals.iloc[0] = 1
+    return simulate_portfolio(df, signals, initial_capital)

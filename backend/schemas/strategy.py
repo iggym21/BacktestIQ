@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Any
 from datetime import datetime
 
@@ -10,11 +10,10 @@ class StrategySaveRequest(BaseModel):
 
 
 class StrategyResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     name: str
     mode: str
     config: dict[str, Any]
     created_at: datetime
-
-    class Config:
-        from_attributes = True
