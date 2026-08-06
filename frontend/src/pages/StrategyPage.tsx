@@ -5,13 +5,15 @@ import Layout from "../components/layout/Layout";
 import VisualBuilder from "../components/strategy/VisualBuilder";
 import CodeEditor, { DEFAULT_CODE } from "../components/strategy/CodeEditor";
 import AIGenerator from "../components/strategy/AIGenerator";
+import PositionSizingInput from "../components/strategy/PositionSizingInput";
 import { runBacktest } from "../api/backtest";
 import { saveStrategy } from "../api/strategies";
-import type { SavedStrategy, StrategyConfig, StrategyRuleSet } from "../types";
+import type { PositionSizing, SavedStrategy, StrategyConfig, StrategyRuleSet } from "../types";
 
 type Mode = "visual" | "code" | "ai";
 
 const DEFAULT_RULES: StrategyRuleSet = { entry: [], exit: [], logic: "AND" };
+const DEFAULT_POSITION_SIZING: PositionSizing = { type: "percent", value: 100 };
 
 export default function StrategyPage() {
   const navigate = useNavigate();
@@ -26,6 +28,9 @@ export default function StrategyPage() {
   const [benchmark, setBenchmark] = useState("SPY");
   const [rules, setRules] = useState<StrategyRuleSet>(loaded?.config.rules ?? DEFAULT_RULES);
   const [code, setCode] = useState(loaded?.config.code ?? DEFAULT_CODE);
+  const [positionSizing, setPositionSizing] = useState<PositionSizing>(
+    loaded?.config.position_sizing ?? DEFAULT_POSITION_SIZING
+  );
   const [loading, setLoading] = useState(false);
   const [saveName, setSaveName] = useState(loaded?.name ?? "");
   const [showSaveModal, setShowSaveModal] = useState(false);
@@ -34,7 +39,7 @@ export default function StrategyPage() {
     mode: mode === "ai" ? "visual" : mode,
     rules: mode !== "code" ? rules : undefined,
     code: mode === "code" ? code : undefined,
-    position_sizing: { type: "percent", value: 100 },
+    position_sizing: positionSizing,
   });
 
   const handleRun = async () => {
@@ -113,6 +118,7 @@ export default function StrategyPage() {
             <input value={benchmark} onChange={(e) => setBenchmark(e.target.value.toUpperCase())}
               className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm uppercase" />
           </div>
+          <PositionSizingInput value={positionSizing} onChange={setPositionSizing} />
         </div>
 
         {/* Mode tabs */}

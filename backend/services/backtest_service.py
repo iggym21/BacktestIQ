@@ -53,7 +53,7 @@ def run_strategy_backtest(
         except Exception as e:
             raise BacktestStrategyError(f"Code error: {str(e)}") from e
 
-    result = simulate_portfolio(df, signals, initial_capital)
+    result = simulate_portfolio(df, signals, initial_capital, position_sizing=strategy.position_sizing.model_dump())
     bench_result = simulate_buy_and_hold(benchmark_df, initial_capital)
 
     metrics = calculate_metrics(

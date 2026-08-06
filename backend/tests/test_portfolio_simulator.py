@@ -62,3 +62,53 @@ def test_buy_and_hold_empty_df_returns_no_trades():
     empty = pd.DataFrame({"close": []}, index=pd.DatetimeIndex([]))
     result = simulate_buy_and_hold(empty, 10000)
     assert result["trades"] == []
+
+
+def test_position_sizing_percent_invests_partial_capital():
+    """Regression test: position_sizing was accepted by the API but never
+    actually consulted — every backtest always invested 100% of equity
+    regardless of what the user configured."""
+    prices = [100.0, 110.0, 120.0]
+    df = pd.DataFrame({"close": prices}, index=pd.date_range("2022-01-01", periods=3, freq="D"))
+    signals = pd.Series([1, 0, -1], index=df.index)
+    result = simulate_portfolio(df, signals, 10000, position_sizing={"type": "percent", "value": 25})
+    assert result["trades"][0]["shares"] == pytest.approx(25, rel=0.001)  # 2500 / 100
+    # 75% of capital (7500) stays idle cash; only 25 shares track the price move.
+    assert result["equity_curve"].iloc[1] == pytest.approx(7500 + 25 * 110, rel=0.001)
+    assert result["equity_curve"].iloc[2] == pytest.approx(10000 + 25 * 20, rel=0.001)
+
+
+def test_position_sizing_dollar_invests_fixed_amount():
+    prices = [100.0, 120.0]
+    df = pd.DataFrame({"close": prices}, index=pd.date_range("2022-01-01", periods=2, freq="D"))
+    signals = pd.Series([1, 0], index=df.index)
+    result = simulate_portfolio(df, signals, 10000, position_sizing={"type": "dollar", "value": 2000})
+    assert result["trades"][0]["shares"] == pytest.approx(20, rel=0.001)  # 2000 / 100
+    assert result["equity_curve"].iloc[1] == pytest.approx(8000 + 20 * 120, rel=0.001)
+
+
+def test_position_sizing_shares_buys_fixed_share_count():
+    prices = [100.0, 120.0]
+    df = pd.DataFrame({"close": prices}, index=pd.date_range("2022-01-01", periods=2, freq="D"))
+    signals = pd.Series([1, 0], index=df.index)
+    result = simulate_portfolio(df, signals, 10000, position_sizing={"type": "shares", "value": 10})
+    assert result["trades"][0]["shares"] == pytest.approx(10, rel=0.001)
+    assert result["equity_curve"].iloc[1] == pytest.approx(9000 + 10 * 120, rel=0.001)
+
+
+def test_position_sizing_dollar_amount_larger_than_equity_is_capped():
+    prices = [100.0, 120.0]
+    df = pd.DataFrame({"close": prices}, index=pd.date_range("2022-01-01", periods=2, freq="D"))
+    signals = pd.Series([1, 0], index=df.index)
+    result = simulate_portfolio(df, signals, 10000, position_sizing={"type": "dollar", "value": 50000})
+    # Can't invest more than available equity, even if the requested dollar amount is larger.
+    assert result["trades"][0]["shares"] == pytest.approx(100, rel=0.001)  # all 10000 / 100
+
+
+def test_default_position_sizing_is_fully_invested():
+    """No position_sizing passed -> behaves exactly as before (100% invested)."""
+    prices = [100.0, 120.0]
+    df = pd.DataFrame({"close": prices}, index=pd.date_range("2022-01-01", periods=2, freq="D"))
+    signals = pd.Series([1, 0], index=df.index)
+    result = simulate_portfolio(df, signals, 10000)
+    assert result["trades"][0]["shares"] == pytest.approx(100, rel=0.001)

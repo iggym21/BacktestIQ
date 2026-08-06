@@ -2,8 +2,24 @@ import pandas as pd
 import numpy as np
 from typing import Any
 
+DEFAULT_POSITION_SIZING = {"type": "percent", "value": 100.0}
+
+
+def _invest_amount(equity: float, price: float, position_sizing: dict) -> float:
+    sizing_type = position_sizing.get("type", "percent")
+    value = position_sizing.get("value", 100.0)
+    if sizing_type == "dollar":
+        amount = value
+    elif sizing_type == "shares":
+        amount = value * price
+    else:  # percent
+        amount = equity * (value / 100)
+    return max(0.0, min(amount, equity))
+
+
 def simulate_portfolio(df: pd.DataFrame, signals: pd.Series, initial_capital: float,
-                       commission_pct: float = 0.0) -> dict[str, Any]:
+                       commission_pct: float = 0.0, position_sizing: dict | None = None) -> dict[str, Any]:
+    position_sizing = position_sizing or DEFAULT_POSITION_SIZING
     equity = initial_capital
     position = 0
     entry_price = 0.0
@@ -15,20 +31,21 @@ def simulate_portfolio(df: pd.DataFrame, signals: pd.Series, initial_capital: fl
         price = row["close"]
 
         if sig == 1 and position == 0:
-            cost = equity * commission_pct
-            investable = equity - cost
-            shares = investable / price
-            position = shares
-            entry_price = price
-            equity = 0.0
-            trades.append({"date": str(date.date()), "type": "buy", "price": price,
-                           "shares": shares, "pnl": 0.0})
+            invest_amount = _invest_amount(equity, price, position_sizing)
+            cost = invest_amount * commission_pct
+            shares = (invest_amount - cost) / price if invest_amount > 0 else 0.0
+            if shares > 0:
+                position = shares
+                entry_price = price
+                equity -= invest_amount
+                trades.append({"date": str(date.date()), "type": "buy", "price": price,
+                               "shares": shares, "pnl": 0.0})
 
         elif sig == -1 and position > 0:
             proceeds = position * price
             cost = proceeds * commission_pct
             pnl = position * (price - entry_price) - cost
-            equity = position * price - cost
+            equity += proceeds - cost
             trades.append({"date": str(date.date()), "type": "sell", "price": price,
                            "shares": position, "pnl": round(pnl, 2)})
             position = 0

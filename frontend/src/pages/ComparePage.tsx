@@ -3,10 +3,12 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import toast from "react-hot-toast";
 import Layout from "../components/layout/Layout";
 import VisualBuilder from "../components/strategy/VisualBuilder";
+import PositionSizingInput from "../components/strategy/PositionSizingInput";
 import { compareBacktest } from "../api/backtest";
-import type { StrategyRuleSet, TickerCompareResult } from "../types";
+import type { PositionSizing, StrategyRuleSet, TickerCompareResult } from "../types";
 
 const DEFAULT_RULES: StrategyRuleSet = { entry: [], exit: [], logic: "AND" };
+const DEFAULT_POSITION_SIZING: PositionSizing = { type: "percent", value: 100 };
 const LINE_COLORS = ["#7c3aed", "#22c55e", "#f59e0b", "#ec4899", "#38bdf8"];
 
 const pct = (v: number) => `${(v * 100).toFixed(2)}%`;
@@ -18,6 +20,7 @@ export default function ComparePage() {
   const [capital, setCapital] = useState(10000);
   const [benchmark, setBenchmark] = useState("SPY");
   const [rules, setRules] = useState<StrategyRuleSet>(DEFAULT_RULES);
+  const [positionSizing, setPositionSizing] = useState<PositionSizing>(DEFAULT_POSITION_SIZING);
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<TickerCompareResult[] | null>(null);
 
@@ -33,7 +36,7 @@ export default function ComparePage() {
     try {
       const { data } = await compareBacktest({
         tickers, start_date: startDate, end_date: endDate,
-        strategy: { mode: "visual", rules, position_sizing: { type: "percent", value: 100 } },
+        strategy: { mode: "visual", rules, position_sizing: positionSizing },
         initial_capital: capital, benchmark,
       });
       setResults(data.results);
@@ -91,6 +94,7 @@ export default function ComparePage() {
             <input type="number" value={capital} onChange={(e) => setCapital(Number(e.target.value))}
               className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm" />
           </div>
+          <PositionSizingInput value={positionSizing} onChange={setPositionSizing} />
           <div>
             <label className="block text-xs text-slate-400 mb-1">Benchmark</label>
             <input value={benchmark} onChange={(e) => setBenchmark(e.target.value.toUpperCase())}
