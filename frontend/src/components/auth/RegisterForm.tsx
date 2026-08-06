@@ -21,8 +21,9 @@ export default function RegisterForm() {
       await register(email, password);
       navigate("/");
       toast.success("Account created!");
-    } catch (err: any) {
-      toast.error(err?.response?.data?.detail ?? "Registration failed");
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
+      toast.error(message ?? "Registration failed");
     } finally {
       setLoading(false);
     }
@@ -37,8 +38,9 @@ export default function RegisterForm() {
         </div>
         <form onSubmit={handleSubmit} className="bg-slate-900 rounded-xl p-8 border border-slate-800 space-y-5">
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">Email</label>
+            <label htmlFor="register-email" className="block text-sm font-medium text-slate-300 mb-1.5">Email</label>
             <input
+              id="register-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -48,8 +50,9 @@ export default function RegisterForm() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">Password</label>
+            <label htmlFor="register-password" className="block text-sm font-medium text-slate-300 mb-1.5">Password</label>
             <input
+              id="register-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
