@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from routers import auth, strategies, backtest, data, ai, export
+from routers import auth, strategies, backtest, data, ai, export, public
 
 app = FastAPI(title="BacktestIQ API")
 
@@ -19,6 +19,7 @@ app.include_router(backtest.router, prefix="/backtest", tags=["backtest"])
 app.include_router(data.router, prefix="/data", tags=["data"])
 app.include_router(ai.router, prefix="/ai", tags=["ai"])
 app.include_router(export.router, prefix="/export", tags=["export"])
+app.include_router(public.router, prefix="/public", tags=["public"])
 
 
 @app.exception_handler(Exception)

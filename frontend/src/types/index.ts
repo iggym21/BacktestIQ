@@ -78,6 +78,20 @@ export interface DrawdownPoint {
 }
 
 export interface BacktestResult {
+  run_id: string;
+  metrics: BacktestMetrics;
+  equity_curve: EquityPoint[];
+  drawdown: DrawdownPoint[];
+  trades: Trade[];
+}
+
+export interface PublicResult {
+  ticker: string;
+  start_date: string;
+  end_date: string;
+  benchmark: string;
+  initial_capital: number;
+  created_at: string;
   metrics: BacktestMetrics;
   equity_curve: EquityPoint[];
   drawdown: DrawdownPoint[];

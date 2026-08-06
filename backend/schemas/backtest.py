@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import Any, Literal
+from datetime import datetime
 
 
 class StrategyRule(BaseModel):
@@ -37,6 +38,7 @@ class BacktestRequest(BaseModel):
 
 
 class BacktestResponse(BaseModel):
+    run_id: str
     metrics: dict[str, Any]
     equity_curve: list[dict]
     drawdown: list[dict]
@@ -108,3 +110,20 @@ class WalkForwardFold(BaseModel):
 
 class WalkForwardResponse(BaseModel):
     folds: list[WalkForwardFold]
+
+
+class ShareResponse(BaseModel):
+    share_token: str
+
+
+class PublicResultResponse(BaseModel):
+    ticker: str
+    start_date: str
+    end_date: str
+    benchmark: str
+    initial_capital: float
+    created_at: datetime
+    metrics: dict[str, Any]
+    equity_curve: list[dict]
+    drawdown: list[dict]
+    trades: list[dict]

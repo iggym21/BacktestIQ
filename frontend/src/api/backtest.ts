@@ -1,7 +1,7 @@
 import client from "./client";
 import type {
   BacktestResult, BacktestRequest, CompareRequest, CompareResult,
-  SweepRequest, SweepResult, WalkForwardRequest, WalkForwardResult,
+  SweepRequest, SweepResult, WalkForwardRequest, WalkForwardResult, PublicResult,
 } from "../types";
 
 export const runBacktest = (req: BacktestRequest) =>
@@ -15,6 +15,12 @@ export const sweepBacktest = (req: SweepRequest) =>
 
 export const walkForwardBacktest = (req: WalkForwardRequest) =>
   client.post<WalkForwardResult>("/backtest/walkforward", req);
+
+export const shareBacktestRun = (runId: string) =>
+  client.post<{ share_token: string }>(`/backtest/runs/${runId}/share`);
+
+export const getPublicResult = (token: string) =>
+  client.get<PublicResult>(`/public/results/${token}`);
 
 export const exportTearsheet = async (
   data: BacktestResult & { ticker: string; start_date: string; end_date: string }

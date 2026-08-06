@@ -1,3 +1,4 @@
+import secrets
 from datetime import date
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -6,6 +7,7 @@ from schemas.backtest import (
     BacktestRequest, BacktestResponse, CompareRequest, CompareResponse, TickerResult,
     SweepRequest, SweepResponse, SweepPoint,
     WalkForwardRequest, WalkForwardResponse, WalkForwardFold,
+    ShareResponse,
 )
 from services.backtest_service import (
     run_strategy_backtest, run_parameter_sweep, run_walk_forward,
@@ -43,11 +45,34 @@ def run_backtest(
         initial_capital=req.initial_capital,
         benchmark=req.benchmark,
         metrics=result["metrics"],
+        equity_curve=result["equity_curve"],
+        drawdown=result["drawdown"],
+        trades=result["trades"],
     )
     db.add(run)
     db.commit()
+    db.refresh(run)
 
-    return BacktestResponse(**result)
+    return BacktestResponse(run_id=run.id, **result)
+
+
+@router.post("/runs/{run_id}/share", response_model=ShareResponse)
+def share_backtest_run(
+    run_id: str,
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user),
+):
+    run = db.query(BacktestRun).filter(
+        BacktestRun.id == run_id, BacktestRun.user_id == user.id
+    ).first()
+    if not run:
+        raise HTTPException(status_code=404, detail="Backtest run not found")
+
+    if not run.share_token:
+        run.share_token = secrets.token_urlsafe(16)
+        db.commit()
+
+    return ShareResponse(share_token=run.share_token)
 
 
 @router.post("/compare", response_model=CompareResponse)

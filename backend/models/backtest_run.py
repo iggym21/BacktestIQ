@@ -19,6 +19,10 @@ class BacktestRun(Base):
     initial_capital: Mapped[float] = mapped_column(Float, nullable=False)
     benchmark: Mapped[str] = mapped_column(String, default="SPY")
     metrics: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    equity_curve: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    drawdown: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    trades: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    share_token: Mapped[str | None] = mapped_column(String, unique=True, nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     user: Mapped["User"] = relationship(back_populates="backtest_runs")
