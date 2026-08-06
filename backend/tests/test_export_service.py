@@ -57,6 +57,37 @@ def test_generate_tearsheet_truncates_trade_log_to_fifty_rows(sample_metrics):
     assert pdf.startswith(b"%PDF")
 
 
+def test_generate_tearsheet_escapes_html_in_client_supplied_fields(monkeypatch, sample_trades):
+    """ExportRequest isn't tied to a stored/validated BacktestRun — metrics,
+    ticker, and dates are all free-form client-submitted data that get
+    interpolated into HTML WeasyPrint renders server-side. WeasyPrint's
+    renderer will fetch external resources a <img>/<link> tag references, so
+    unescaped interpolation is an SSRF/local-file-read vector, not just a
+    layout-breakage risk. Capture the HTML string WeasyPrint would receive
+    (by patching the weasyprint.HTML class it's constructed from) and assert
+    a malicious payload never appears as a live tag."""
+    captured = {}
+
+    class _CaptureHTML:
+        def __init__(self, string):
+            captured["html"] = string
+
+        def write_pdf(self):
+            return b"%PDF-fake"
+
+    monkeypatch.setattr("weasyprint.HTML", _CaptureHTML)
+    payload = '<img src="http://internal.example/steal" onerror="x">'
+
+    generate_tearsheet(
+        {payload: payload}, equity_curve=[], trades=sample_trades,
+        ticker=payload, start_date=payload, end_date="2023-12-31",
+    )
+
+    doc = captured["html"]
+    assert "<img" not in doc
+    assert "&lt;img" in doc
+
+
 def test_ensure_macos_library_path_is_a_noop_when_already_set(monkeypatch):
     monkeypatch.setattr("sys.platform", "darwin")
     monkeypatch.setenv("DYLD_FALLBACK_LIBRARY_PATH", "/some/existing/path")

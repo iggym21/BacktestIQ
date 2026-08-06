@@ -1,3 +1,4 @@
+import html
 import os
 
 
@@ -38,17 +39,33 @@ def generate_tearsheet(
             "On Linux: install libpango-1.0-0, libpangoft2-1.0-0, and libcairo2."
         ) from e
 
+    # metrics/trades/ticker/dates all arrive as free-form client-submitted
+    # data (ExportRequest isn't tied to a stored/validated BacktestRun), and
+    # this HTML is handed to WeasyPrint, whose renderer will fetch any
+    # external resource a <img>/<link> tag references — so unescaped
+    # interpolation here isn't just cosmetic markup breakage, it's a
+    # server-side request forgery / local-file-read vector via a crafted
+    # ticker, metric key, or trade field. Escape everything.
+    esc = html.escape
     metrics_rows = "".join(
-        f"<tr><td>{k.replace('_', ' ').title()}</td><td>{v}</td></tr>"
+        f"<tr><td>{esc(str(k).replace('_', ' ').title())}</td><td>{esc(str(v))}</td></tr>"
         for k, v in metrics.items()
     )
+
+    def _fmt_money(value) -> str:
+        try:
+            return f"${float(value):.2f}"
+        except (TypeError, ValueError):
+            return esc(str(value))
+
     trades_rows = "".join(
-        f"<tr><td>{t['date']}</td><td>{t['type'].upper()}</td>"
-        f"<td>${t['price']:.2f}</td><td>{t['shares']:.2f}</td>"
-        f"<td class='{'pos' if t['pnl'] >= 0 else 'neg'}'>${t['pnl']:.2f}</td></tr>"
+        f"<tr><td>{esc(str(t.get('date', '')))}</td><td>{esc(str(t.get('type', '')).upper())}</td>"
+        f"<td>{_fmt_money(t.get('price', 0))}</td><td>{esc(str(t.get('shares', '')))}</td>"
+        f"<td class='{'pos' if isinstance(t.get('pnl'), (int, float)) and t['pnl'] >= 0 else 'neg'}'>"
+        f"{_fmt_money(t.get('pnl', 0))}</td></tr>"
         for t in trades[:50]
     )
-    html = f"""<!DOCTYPE html>
+    doc = f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8">
 <style>
   body {{ font-family: Arial, sans-serif; color: #1a1a2e; margin: 40px; }}
@@ -65,7 +82,7 @@ def generate_tearsheet(
 <body>
   <div class="header">
     <div><h1>BacktestIQ Tearsheet</h1>
-    <p><strong>{ticker}</strong> &nbsp; {start_date} – {end_date}</p></div>
+    <p><strong>{esc(ticker)}</strong> &nbsp; {esc(start_date)} – {esc(end_date)}</p></div>
     <span class="badge">MVP</span>
   </div>
   <h2>Performance Metrics</h2>
@@ -75,4 +92,4 @@ def generate_tearsheet(
   <table><thead><tr><th>Date</th><th>Type</th><th>Price</th><th>Shares</th><th>P&amp;L</th></tr></thead>
   <tbody>{trades_rows}</tbody></table>
 </body></html>"""
-    return HTML(string=html).write_pdf()
+    return HTML(string=doc).write_pdf()
