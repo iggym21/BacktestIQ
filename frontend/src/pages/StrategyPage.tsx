@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import Layout from "../components/layout/Layout";
 import VisualBuilder from "../components/strategy/VisualBuilder";
@@ -7,7 +7,7 @@ import CodeEditor from "../components/strategy/CodeEditor";
 import AIGenerator from "../components/strategy/AIGenerator";
 import { runBacktest } from "../api/backtest";
 import { saveStrategy } from "../api/strategies";
-import type { StrategyConfig, StrategyRuleSet } from "../types";
+import type { SavedStrategy, StrategyConfig, StrategyRuleSet } from "../types";
 
 type Mode = "visual" | "code" | "ai";
 
@@ -16,16 +16,19 @@ const DEFAULT_CODE = "";
 
 export default function StrategyPage() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<Mode>("visual");
+  const location = useLocation();
+  const loaded = (location.state as { loaded?: SavedStrategy } | null)?.loaded;
+
+  const [mode, setMode] = useState<Mode>(loaded?.mode === "code" ? "code" : "visual");
   const [ticker, setTicker] = useState("SPY");
   const [startDate, setStartDate] = useState("2020-01-01");
   const [endDate, setEndDate] = useState("2023-12-31");
   const [capital, setCapital] = useState(10000);
   const [benchmark, setBenchmark] = useState("SPY");
-  const [rules, setRules] = useState<StrategyRuleSet>(DEFAULT_RULES);
-  const [code, setCode] = useState(DEFAULT_CODE);
+  const [rules, setRules] = useState<StrategyRuleSet>(loaded?.config.rules ?? DEFAULT_RULES);
+  const [code, setCode] = useState(loaded?.config.code ?? DEFAULT_CODE);
   const [loading, setLoading] = useState(false);
-  const [saveName, setSaveName] = useState("");
+  const [saveName, setSaveName] = useState(loaded?.name ?? "");
   const [showSaveModal, setShowSaveModal] = useState(false);
 
   const getConfig = (): StrategyConfig => ({
