@@ -39,6 +39,12 @@ export default function HomePage() {
           >
             Compare Tickers
           </Link>
+          <Link
+            to="/optimize"
+            className="bg-slate-800 hover:bg-slate-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors border border-slate-700"
+          >
+            Optimize Parameters
+          </Link>
         </div>
       </div>
 

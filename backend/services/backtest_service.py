@@ -6,6 +6,8 @@ from services.signal_generator import generate_signals_from_rules, generate_sign
 from services.portfolio_simulator import simulate_portfolio, simulate_buy_and_hold
 from services.metrics import calculate_metrics
 
+MAX_SWEEP_POINTS = 20
+
 
 class BacktestDataError(Exception):
     """Raised when historical data can't be fetched for a ticker."""
@@ -13,6 +15,10 @@ class BacktestDataError(Exception):
 
 class BacktestStrategyError(Exception):
     """Raised when the strategy payload is invalid or code fails to run."""
+
+
+class SweepConfigError(Exception):
+    """Raised when the sweep request itself is malformed (bad rule index, too many points, etc)."""
 
 
 def run_strategy_backtest(
@@ -80,3 +86,65 @@ def run_strategy_backtest(
         "drawdown": drawdown_records,
         "trades": result["trades"],
     }
+
+
+def _sweep_values(start: float, stop: float, step: float) -> list[float]:
+    if step <= 0:
+        raise SweepConfigError("step must be positive")
+    if stop < start:
+        raise SweepConfigError("stop must be >= start")
+    n = int(round((stop - start) / step)) + 1
+    if n > MAX_SWEEP_POINTS:
+        raise SweepConfigError(f"Sweep would produce {n} points, maximum is {MAX_SWEEP_POINTS}")
+    values = [round(start + i * step, 6) for i in range(n)]
+    # Guard against float drift pushing the last value past `stop`.
+    return [v for v in values if v <= stop + 1e-9]
+
+
+def run_parameter_sweep(
+    ticker: str,
+    start_date: str,
+    end_date: str,
+    strategy: StrategyPayload,
+    initial_capital: float,
+    benchmark: str,
+    rule_group: str,
+    rule_index: int,
+    param: str,
+    start: float,
+    stop: float,
+    step: float,
+) -> list[dict]:
+    """Run the same strategy repeatedly, sweeping one numeric rule parameter
+    (e.g. a moving-average period) across a range, holding everything else
+    fixed. Only supports visual-mode strategies — code-mode strategies don't
+    have a structured parameter to target.
+    """
+    if strategy.mode != "visual" or not strategy.rules:
+        raise SweepConfigError("Parameter sweep requires a visual-mode strategy with rules")
+
+    rules = strategy.rules.entry if rule_group == "entry" else strategy.rules.exit
+    if rule_index < 0 or rule_index >= len(rules):
+        raise SweepConfigError(f"rule_index {rule_index} out of range for {rule_group} rules (has {len(rules)})")
+    if param not in rules[rule_index].params:
+        raise SweepConfigError(f"Rule at {rule_group}[{rule_index}] has no parameter '{param}'")
+    # Indicator params like SMA/EMA/RSI period are integers (pandas .rolling()
+    # rejects a float window); preserve whatever type the original had.
+    cast = type(rules[rule_index].params[param])
+
+    values = _sweep_values(start, stop, step)
+
+    points = []
+    for value in values:
+        swept_strategy = strategy.model_copy(deep=True)
+        swept_rules = swept_strategy.rules.entry if rule_group == "entry" else swept_strategy.rules.exit
+        swept_rules[rule_index].params[param] = cast(value)
+        try:
+            result = run_strategy_backtest(
+                ticker, start_date, end_date, swept_strategy, initial_capital, benchmark,
+            )
+            points.append({"value": value, "metrics": result["metrics"], "error": None})
+        except (BacktestDataError, BacktestStrategyError) as e:
+            points.append({"value": value, "metrics": None, "error": str(e)})
+
+    return points

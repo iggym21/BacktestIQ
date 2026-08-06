@@ -2,8 +2,14 @@ from datetime import date
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database import get_db
-from schemas.backtest import BacktestRequest, BacktestResponse, CompareRequest, CompareResponse, TickerResult
-from services.backtest_service import run_strategy_backtest, BacktestDataError, BacktestStrategyError
+from schemas.backtest import (
+    BacktestRequest, BacktestResponse, CompareRequest, CompareResponse, TickerResult,
+    SweepRequest, SweepResponse, SweepPoint,
+)
+from services.backtest_service import (
+    run_strategy_backtest, run_parameter_sweep,
+    BacktestDataError, BacktestStrategyError, SweepConfigError,
+)
 from routers.auth import get_current_user
 from models.backtest_run import BacktestRun
 
@@ -67,3 +73,23 @@ def compare_backtest(
             results.append(TickerResult(ticker=ticker, error=str(e)))
 
     return CompareResponse(results=results)
+
+
+@router.post("/sweep", response_model=SweepResponse)
+def sweep_backtest(
+    req: SweepRequest,
+    user=Depends(get_current_user),
+):
+    try:
+        points = run_parameter_sweep(
+            req.ticker, req.start_date, req.end_date, req.strategy,
+            req.initial_capital, req.benchmark,
+            req.rule_group, req.rule_index, req.param,
+            req.start, req.stop, req.step,
+        )
+    except SweepConfigError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except BacktestDataError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+    return SweepResponse(points=[SweepPoint(**p) for p in points])

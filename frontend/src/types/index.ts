@@ -104,6 +104,31 @@ export interface CompareResult {
   results: TickerCompareResult[];
 }
 
+export interface SweepRequest {
+  ticker: string;
+  start_date: string;
+  end_date: string;
+  strategy: StrategyConfig;
+  initial_capital: number;
+  benchmark: string;
+  rule_group: "entry" | "exit";
+  rule_index: number;
+  param: string;
+  start: number;
+  stop: number;
+  step: number;
+}
+
+export interface SweepPoint {
+  value: number;
+  metrics: BacktestMetrics | null;
+  error: string | null;
+}
+
+export interface SweepResult {
+  points: SweepPoint[];
+}
+
 export interface SavedStrategy {
   id: string;
   name: string;

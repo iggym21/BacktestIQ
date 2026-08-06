@@ -61,3 +61,28 @@ class TickerResult(BaseModel):
 
 class CompareResponse(BaseModel):
     results: list[TickerResult]
+
+
+class SweepRequest(BaseModel):
+    ticker: str
+    start_date: str
+    end_date: str
+    strategy: StrategyPayload
+    initial_capital: float = 10000.0
+    benchmark: str = "SPY"
+    rule_group: Literal["entry", "exit"]
+    rule_index: int
+    param: str
+    start: float
+    stop: float
+    step: float
+
+
+class SweepPoint(BaseModel):
+    value: float
+    metrics: dict[str, Any] | None = None
+    error: str | None = None
+
+
+class SweepResponse(BaseModel):
+    points: list[SweepPoint]

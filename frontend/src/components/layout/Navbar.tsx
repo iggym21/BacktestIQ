@@ -29,6 +29,9 @@ export default function Navbar() {
           <Link to="/compare" className="text-slate-400 hover:text-white transition-colors">
             Compare
           </Link>
+          <Link to="/optimize" className="text-slate-400 hover:text-white transition-colors">
+            Optimize
+          </Link>
         </div>
       </div>
       <div className="flex items-center gap-4">
