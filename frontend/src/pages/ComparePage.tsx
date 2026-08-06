@@ -30,6 +30,7 @@ export default function ComparePage() {
     if (tickers.length > 5) return toast.error("Maximum 5 tickers per comparison");
     if (rules.entry.length === 0) return toast.error("Add at least one entry rule");
     if (new Date(startDate) >= new Date(endDate)) return toast.error("Start date must be before end date");
+    if (capital <= 0) return toast.error("Capital must be positive");
 
     setLoading(true);
     setResults(null);

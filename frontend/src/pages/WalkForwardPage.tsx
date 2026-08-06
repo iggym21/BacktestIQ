@@ -44,6 +44,7 @@ export default function WalkForwardPage() {
   const handleRun = async () => {
     if (rules.entry.length === 0) return toast.error("Add at least one entry rule");
     if (new Date(startDate) >= new Date(endDate)) return toast.error("Start date must be before end date");
+    if (capital <= 0) return toast.error("Capital must be positive");
     if (folds < 2 || folds > 12) return toast.error("Folds must be between 2 and 12");
 
     setLoading(true);

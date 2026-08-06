@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Any, Literal
 from datetime import datetime
 
@@ -33,7 +33,7 @@ class BacktestRequest(BaseModel):
     start_date: str
     end_date: str
     strategy: StrategyPayload
-    initial_capital: float = 10000.0
+    initial_capital: float = Field(default=10000.0, gt=0)
     benchmark: str = "SPY"
 
 
@@ -50,7 +50,7 @@ class CompareRequest(BaseModel):
     start_date: str
     end_date: str
     strategy: StrategyPayload
-    initial_capital: float = 10000.0
+    initial_capital: float = Field(default=10000.0, gt=0)
     benchmark: str = "SPY"
 
 
@@ -70,7 +70,7 @@ class SweepRequest(BaseModel):
     start_date: str
     end_date: str
     strategy: StrategyPayload
-    initial_capital: float = 10000.0
+    initial_capital: float = Field(default=10000.0, gt=0)
     benchmark: str = "SPY"
     rule_group: Literal["entry", "exit"]
     rule_index: int
@@ -95,7 +95,7 @@ class WalkForwardRequest(BaseModel):
     start_date: str
     end_date: str
     strategy: StrategyPayload
-    initial_capital: float = 10000.0
+    initial_capital: float = Field(default=10000.0, gt=0)
     benchmark: str = "SPY"
     folds: int = 4
 

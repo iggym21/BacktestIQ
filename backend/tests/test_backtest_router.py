@@ -63,6 +63,23 @@ def test_run_backtest_end_to_end_returns_200():
     assert body["metrics"]["num_trades"] >= 1
 
 
+@pytest.mark.parametrize("bad_capital", [0, -1000])
+def test_run_backtest_rejects_non_positive_initial_capital(bad_capital):
+    """initial_capital=0 doesn't crash (numpy silently returns nan/inf rather
+    than raising ZeroDivisionError on the (equity - capital) / capital divide
+    in metrics.py), but it produces a "successful" 200 full of nonsensical
+    null metrics — a nonpositive starting balance should never be a runnable
+    backtest in the first place, so reject it at the request boundary."""
+    headers = _auth_headers()
+    payload = {
+        "ticker": "SPY", "start_date": "2022-01-01", "end_date": "2022-03-01",
+        "benchmark": "SPY", "initial_capital": bad_capital,
+        "strategy": {"mode": "visual", "rules": {"entry": [], "exit": [], "logic": "AND"}},
+    }
+    resp = client.post("/backtest/run", json=payload, headers=headers)
+    assert resp.status_code == 422
+
+
 def test_run_backtest_requires_auth():
     payload = {
         "ticker": "SPY", "start_date": "2022-01-01", "end_date": "2022-03-01",

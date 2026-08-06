@@ -67,6 +67,7 @@ export default function OptimizePage() {
     if (rangeStop < rangeStart) return toast.error("Range stop must be >= start");
     if (rangeStep <= 0) return toast.error("Step must be positive");
     if (new Date(startDate) >= new Date(endDate)) return toast.error("Start date must be before end date");
+    if (capital <= 0) return toast.error("Capital must be positive");
     const pointCount = Math.floor((rangeStop - rangeStart) / rangeStep) + 1;
     if (pointCount > MAX_SWEEP_POINTS) {
       return toast.error(`That range would run ${pointCount} backtests — maximum is ${MAX_SWEEP_POINTS}. Widen the step or narrow the range.`);
