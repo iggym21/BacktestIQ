@@ -158,3 +158,11 @@ export interface SavedStrategy {
   config: StrategyConfig;
   created_at: string;
 }
+
+export interface StrategyVersion {
+  id: string;
+  name: string;
+  mode: string;
+  config: StrategyConfig;
+  created_at: string;
+}

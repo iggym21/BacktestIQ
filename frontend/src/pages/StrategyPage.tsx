@@ -7,7 +7,7 @@ import { DEFAULT_CODE } from "../components/strategy/codeDefaults";
 import AIGenerator from "../components/strategy/AIGenerator";
 import PositionSizingInput from "../components/strategy/PositionSizingInput";
 import { runBacktest } from "../api/backtest";
-import { saveStrategy } from "../api/strategies";
+import { saveStrategy, updateStrategy } from "../api/strategies";
 import type { PositionSizing, SavedStrategy, StrategyConfig, StrategyRuleSet } from "../types";
 
 // Monaco is a large dependency (~1MB) — only load it when Code mode is actually used.
@@ -22,6 +22,7 @@ export default function StrategyPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const loaded = (location.state as { loaded?: SavedStrategy } | null)?.loaded;
+  const [loadedId, setLoadedId] = useState<string | null>(loaded?.id ?? null);
 
   const [mode, setMode] = useState<Mode>(loaded?.mode === "code" ? "code" : "visual");
   const [ticker, setTicker] = useState("SPY");
@@ -70,17 +71,32 @@ export default function StrategyPage() {
     }
   };
 
-  const handleSave = async () => {
+  const errorMessage = (err: unknown, fallback: string) =>
+    (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ?? fallback;
+
+  const handleSaveAsNew = async () => {
     if (!saveName.trim()) return toast.error("Enter a strategy name");
     try {
       const cfg = getConfig();
-      await saveStrategy(saveName, cfg.mode, cfg);
+      const { data } = await saveStrategy(saveName, cfg.mode, cfg);
       toast.success("Strategy saved!");
+      setLoadedId(data.id);
       setShowSaveModal(false);
-      setSaveName("");
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
-      toast.error(message ?? "Save failed");
+      toast.error(errorMessage(err, "Save failed"));
+    }
+  };
+
+  const handleUpdate = async () => {
+    if (!loadedId) return;
+    if (!saveName.trim()) return toast.error("Enter a strategy name");
+    try {
+      const cfg = getConfig();
+      await updateStrategy(loadedId, saveName, cfg.mode, cfg);
+      toast.success("Strategy updated — previous version saved to history");
+      setShowSaveModal(false);
+    } catch (err: unknown) {
+      toast.error(errorMessage(err, "Update failed"));
     }
   };
 
@@ -153,7 +169,7 @@ export default function StrategyPage() {
           </button>
           <button onClick={() => setShowSaveModal(true)}
             className="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors">
-            Save
+            {loadedId ? "Save…" : "Save"}
           </button>
         </div>
       </div>
@@ -162,14 +178,26 @@ export default function StrategyPage() {
       {showSaveModal && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 w-full max-w-sm">
-            <h3 className="text-white font-semibold mb-4">Save Strategy</h3>
+            <h3 className="text-white font-semibold mb-4">{loadedId ? "Update Strategy" : "Save Strategy"}</h3>
             <input value={saveName} onChange={(e) => setSaveName(e.target.value)}
               placeholder="Strategy name"
               className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-4 py-2 mb-4" />
-            <div className="flex gap-3">
-              <button onClick={handleSave} className="flex-1 bg-violet-600 hover:bg-violet-700 text-white py-2 rounded-lg">Save</button>
-              <button onClick={() => setShowSaveModal(false)} className="flex-1 bg-slate-800 hover:bg-slate-700 text-white py-2 rounded-lg">Cancel</button>
-            </div>
+            {loadedId ? (
+              <div className="flex flex-col gap-2">
+                <button onClick={handleUpdate} className="bg-violet-600 hover:bg-violet-700 text-white py-2 rounded-lg">
+                  Update (keeps version history)
+                </button>
+                <button onClick={handleSaveAsNew} className="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white py-2 rounded-lg">
+                  Save as New Strategy
+                </button>
+                <button onClick={() => setShowSaveModal(false)} className="text-slate-400 hover:text-white text-sm py-1">Cancel</button>
+              </div>
+            ) : (
+              <div className="flex gap-3">
+                <button onClick={handleSaveAsNew} className="flex-1 bg-violet-600 hover:bg-violet-700 text-white py-2 rounded-lg">Save</button>
+                <button onClick={() => setShowSaveModal(false)} className="flex-1 bg-slate-800 hover:bg-slate-700 text-white py-2 rounded-lg">Cancel</button>
+              </div>
+            )}
           </div>
         </div>
       )}
