@@ -12,11 +12,12 @@ interface Props {
 }
 
 export default function PositionSizingInput({ value, onChange }: Props) {
+  const valueLabel = value.type === "percent" ? "Percent" : value.type === "dollar" ? "Dollars" : "Shares";
   return (
     <>
       <div>
-        <label className="block text-xs text-slate-400 mb-1">Position Sizing</label>
-        <select value={value.type}
+        <label htmlFor="position-sizing-type" className="block text-xs text-slate-400 mb-1">Position Sizing</label>
+        <select id="position-sizing-type" value={value.type}
           onChange={(e) => onChange({ ...value, type: e.target.value as PositionSizing["type"] })}
           className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm">
           {(Object.keys(LABELS) as PositionSizing["type"][]).map((t) => (
@@ -25,10 +26,8 @@ export default function PositionSizingInput({ value, onChange }: Props) {
         </select>
       </div>
       <div>
-        <label className="block text-xs text-slate-400 mb-1">
-          {value.type === "percent" ? "Percent" : value.type === "dollar" ? "Dollars" : "Shares"}
-        </label>
-        <input type="number" min={0} value={value.value}
+        <label htmlFor="position-sizing-value" className="block text-xs text-slate-400 mb-1">{valueLabel}</label>
+        <input id="position-sizing-value" type="number" min={0} value={value.value}
           onChange={(e) => onChange({ ...value, value: Number(e.target.value) })}
           className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm" />
       </div>

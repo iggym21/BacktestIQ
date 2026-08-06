@@ -7,7 +7,7 @@
 [![TypeScript](https://img.shields.io/badge/language-TypeScript-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/build-Vite_6-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
 [![Claude API](https://img.shields.io/badge/AI-Claude_API-D97757?logo=anthropic&logoColor=white)](https://www.anthropic.com/api)
-[![Tests](https://img.shields.io/badge/backend_tests-27_passing-brightgreen)](#testing)
+[![Tests](https://img.shields.io/badge/tests-41_passing-brightgreen)](#testing)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
 ---
@@ -78,7 +78,7 @@ BacktestIQ/
 │   │                          signal generation, portfolio simulation,
 │   │                          metrics, AI generation, PDF export
 │   ├── models/                User, Strategy, BacktestRun (SQLAlchemy)
-│   ├── tests/                  27 pytest tests: unit + end-to-end integration
+│   ├── tests/                  36 pytest tests: unit + end-to-end integration
 │   └── alembic/                DB migrations
 └── frontend/                 React + TypeScript SPA
     └── src/
@@ -92,13 +92,17 @@ BacktestIQ/
 
 ## Testing
 
-Backend: 27 pytest tests covering indicators, signal generation, portfolio simulation, metrics, auth, data caching, and a full end-to-end integration test of the backtest endpoint (register → login → run → verify response shape) with a stubbed data source so it never touches the network.
+Backend: 36 pytest tests covering indicators, signal generation, portfolio simulation (including all three position-sizing modes), metrics, auth, data caching, and end-to-end integration tests of the backtest and multi-ticker-compare endpoints (register → login → run → verify response shape) with a stubbed data source so they never touch the network.
 
 ```bash
 cd backend && pytest -q
 ```
 
-Frontend: TypeScript strict mode + `tsc --noEmit` in CI; manually verified end-to-end (register, both strategy modes, save/load, PDF export, AI generator failure path) during development.
+Frontend: Vitest + React Testing Library for component behavior, TypeScript strict mode + `tsc --noEmit`. Both run in CI on every push.
+
+```bash
+cd frontend && npm test
+```
 
 ## Getting started
 
