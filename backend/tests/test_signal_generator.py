@@ -34,6 +34,31 @@ def test_rsi_threshold_signal(sample_df):
     signals = generate_signals_from_rules(sample_df, rules)
     assert isinstance(signals, pd.Series)
 
+def test_empty_exit_rules_holds_forever_instead_of_crashing(sample_df):
+    """pd.concat([]) raises "No objects to concatenate" — an empty exit list
+    (a valid strategy design: enter on a signal, never explicitly exit, let
+    the backtest period end decide) used to crash instead of just never
+    firing an exit signal."""
+    rules = {
+        "entry": [{"indicator": "CLOSE", "params": {}, "operator": ">", "target": {"value": 0}}],
+        "exit": [],
+        "logic": "AND",
+    }
+    signals = generate_signals_from_rules(sample_df, rules)
+    assert (signals != -1).all()
+    assert (signals == 1).any()
+
+
+def test_empty_entry_rules_never_enters_instead_of_crashing(sample_df):
+    rules = {
+        "entry": [],
+        "exit": [{"indicator": "CLOSE", "params": {}, "operator": "<", "target": {"value": 0}}],
+        "logic": "AND",
+    }
+    signals = generate_signals_from_rules(sample_df, rules)
+    assert (signals == 0).all()
+
+
 def test_code_mode_signal(sample_df):
     code = """
 def generate_signals(df):

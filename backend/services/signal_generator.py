@@ -63,12 +63,16 @@ def generate_signals_from_rules(df: pd.DataFrame, rules: dict) -> pd.Series:
     entry_masks = [_evaluate_rule(df, r) for r in rules["entry"]]
     exit_masks = [_evaluate_rule(df, r) for r in rules["exit"]]
 
-    if logic == "AND":
-        entry = pd.concat(entry_masks, axis=1).all(axis=1)
-        exit_ = pd.concat(exit_masks, axis=1).all(axis=1)
-    else:
-        entry = pd.concat(entry_masks, axis=1).any(axis=1)
-        exit_ = pd.concat(exit_masks, axis=1).any(axis=1)
+    # An empty rule list (e.g. a strategy with entry conditions but no
+    # explicit exit — hold once entered until the backtest period ends) is
+    # valid input, not an error: pd.concat([]) raises "No objects to
+    # concatenate", so it must be handled before reaching pandas, as a mask
+    # that never fires rather than a crash.
+    combine = (lambda masks: pd.concat(masks, axis=1).all(axis=1)) if logic == "AND" \
+        else (lambda masks: pd.concat(masks, axis=1).any(axis=1))
+    false_mask = pd.Series(False, index=df.index)
+    entry = combine(entry_masks) if entry_masks else false_mask
+    exit_ = combine(exit_masks) if exit_masks else false_mask
 
     signals[entry] = 1
     signals[exit_] = -1
