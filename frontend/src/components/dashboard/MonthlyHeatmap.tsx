@@ -2,6 +2,19 @@ import type { EquityPoint } from "../../types";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
+// Tailwind's compiler statically scans source for class names — it can't resolve
+// interpolated strings like `bg-emerald-${n}00`, so the shades must be spelled out.
+const POSITIVE_SHADES = [
+  "bg-emerald-100 text-emerald-950", "bg-emerald-200 text-emerald-950", "bg-emerald-300 text-emerald-950",
+  "bg-emerald-400 text-emerald-950", "bg-emerald-500 text-emerald-950", "bg-emerald-600 text-emerald-50",
+  "bg-emerald-700 text-emerald-50", "bg-emerald-800 text-emerald-50", "bg-emerald-900 text-emerald-50",
+];
+const NEGATIVE_SHADES = [
+  "bg-red-100 text-red-950", "bg-red-200 text-red-950", "bg-red-300 text-red-950",
+  "bg-red-400 text-red-950", "bg-red-500 text-red-950", "bg-red-600 text-red-50",
+  "bg-red-700 text-red-50", "bg-red-800 text-red-50", "bg-red-900 text-red-50",
+];
+
 export default function MonthlyHeatmap({ data }: { data: EquityPoint[] }) {
   const monthly: Record<string, Record<number, number>> = {};
   const sorted = [...data].sort((a, b) => a.date.localeCompare(b.date));
@@ -42,8 +55,8 @@ export default function MonthlyHeatmap({ data }: { data: EquityPoint[] }) {
                 const bg = v === undefined
                   ? "bg-slate-800 text-slate-600"
                   : v >= 0
-                  ? `bg-emerald-${intensity}00 text-emerald-100`
-                  : `bg-red-${intensity}00 text-red-100`;
+                  ? POSITIVE_SHADES[intensity - 1]
+                  : NEGATIVE_SHADES[intensity - 1];
                 return (
                   <td key={i} className={`${bg} text-center rounded py-1 cursor-default`}
                     title={v !== undefined ? `${v.toFixed(2)}%` : "No data"}>
