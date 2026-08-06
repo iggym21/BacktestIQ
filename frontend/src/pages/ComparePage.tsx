@@ -74,30 +74,30 @@ export default function ComparePage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div className="md:col-span-3">
-            <label className="block text-xs text-slate-400 mb-1">Tickers (comma-separated, up to 5)</label>
-            <input value={tickersInput} onChange={(e) => setTickersInput(e.target.value)}
+            <label htmlFor="compare-tickers" className="block text-xs text-slate-400 mb-1">Tickers (comma-separated, up to 5)</label>
+            <input id="compare-tickers" value={tickersInput} onChange={(e) => setTickersInput(e.target.value)}
               placeholder="AAPL, MSFT, GOOGL"
               className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm uppercase" />
           </div>
           <div>
-            <label className="block text-xs text-slate-400 mb-1">Start Date</label>
-            <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
+            <label htmlFor="compare-start-date" className="block text-xs text-slate-400 mb-1">Start Date</label>
+            <input id="compare-start-date" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
               className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm" />
           </div>
           <div>
-            <label className="block text-xs text-slate-400 mb-1">End Date</label>
-            <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)}
+            <label htmlFor="compare-end-date" className="block text-xs text-slate-400 mb-1">End Date</label>
+            <input id="compare-end-date" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)}
               className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm" />
           </div>
           <div>
-            <label className="block text-xs text-slate-400 mb-1">Capital ($)</label>
-            <input type="number" value={capital} onChange={(e) => setCapital(Number(e.target.value))}
+            <label htmlFor="compare-capital" className="block text-xs text-slate-400 mb-1">Capital ($)</label>
+            <input id="compare-capital" type="number" value={capital} onChange={(e) => setCapital(Number(e.target.value))}
               className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm" />
           </div>
           <PositionSizingInput value={positionSizing} onChange={setPositionSizing} />
           <div>
-            <label className="block text-xs text-slate-400 mb-1">Benchmark</label>
-            <input value={benchmark} onChange={(e) => setBenchmark(e.target.value.toUpperCase())}
+            <label htmlFor="compare-benchmark" className="block text-xs text-slate-400 mb-1">Benchmark</label>
+            <input id="compare-benchmark" value={benchmark} onChange={(e) => setBenchmark(e.target.value.toUpperCase())}
               className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm uppercase" />
           </div>
         </div>

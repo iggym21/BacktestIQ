@@ -103,28 +103,28 @@ export default function OptimizePage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div>
-            <label className="block text-xs text-slate-400 mb-1">Ticker</label>
-            <input value={ticker} onChange={(e) => setTicker(e.target.value.toUpperCase())}
+            <label htmlFor="optimize-ticker" className="block text-xs text-slate-400 mb-1">Ticker</label>
+            <input id="optimize-ticker" value={ticker} onChange={(e) => setTicker(e.target.value.toUpperCase())}
               className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm uppercase" />
           </div>
           <div>
-            <label className="block text-xs text-slate-400 mb-1">Start Date</label>
-            <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
+            <label htmlFor="optimize-start-date" className="block text-xs text-slate-400 mb-1">Start Date</label>
+            <input id="optimize-start-date" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
               className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm" />
           </div>
           <div>
-            <label className="block text-xs text-slate-400 mb-1">End Date</label>
-            <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)}
+            <label htmlFor="optimize-end-date" className="block text-xs text-slate-400 mb-1">End Date</label>
+            <input id="optimize-end-date" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)}
               className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm" />
           </div>
           <div>
-            <label className="block text-xs text-slate-400 mb-1">Capital ($)</label>
-            <input type="number" value={capital} onChange={(e) => setCapital(Number(e.target.value))}
+            <label htmlFor="optimize-capital" className="block text-xs text-slate-400 mb-1">Capital ($)</label>
+            <input id="optimize-capital" type="number" value={capital} onChange={(e) => setCapital(Number(e.target.value))}
               className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm" />
           </div>
           <div>
-            <label className="block text-xs text-slate-400 mb-1">Benchmark</label>
-            <input value={benchmark} onChange={(e) => setBenchmark(e.target.value.toUpperCase())}
+            <label htmlFor="optimize-benchmark" className="block text-xs text-slate-400 mb-1">Benchmark</label>
+            <input id="optimize-benchmark" value={benchmark} onChange={(e) => setBenchmark(e.target.value.toUpperCase())}
               className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm uppercase" />
           </div>
         </div>
@@ -137,8 +137,8 @@ export default function OptimizePage() {
           <h3 className="text-white font-semibold mb-4">Sweep Configuration</h3>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <div className="col-span-2">
-              <label className="block text-xs text-slate-400 mb-1">Parameter to sweep</label>
-              <select value={targetKey} onChange={(e) => setTargetKey(Number(e.target.value))}
+              <label htmlFor="optimize-target" className="block text-xs text-slate-400 mb-1">Parameter to sweep</label>
+              <select id="optimize-target" value={targetKey} onChange={(e) => setTargetKey(Number(e.target.value))}
                 disabled={targets.length === 0}
                 className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm disabled:opacity-50">
                 {targets.length === 0
@@ -147,24 +147,24 @@ export default function OptimizePage() {
               </select>
             </div>
             <div>
-              <label className="block text-xs text-slate-400 mb-1">From</label>
-              <input type="number" value={rangeStart} onChange={(e) => setRangeStart(Number(e.target.value))}
+              <label htmlFor="optimize-range-from" className="block text-xs text-slate-400 mb-1">From</label>
+              <input id="optimize-range-from" type="number" value={rangeStart} onChange={(e) => setRangeStart(Number(e.target.value))}
                 className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm" />
             </div>
             <div>
-              <label className="block text-xs text-slate-400 mb-1">To</label>
-              <input type="number" value={rangeStop} onChange={(e) => setRangeStop(Number(e.target.value))}
+              <label htmlFor="optimize-range-to" className="block text-xs text-slate-400 mb-1">To</label>
+              <input id="optimize-range-to" type="number" value={rangeStop} onChange={(e) => setRangeStop(Number(e.target.value))}
                 className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm" />
             </div>
             <div>
-              <label className="block text-xs text-slate-400 mb-1">Step</label>
-              <input type="number" value={rangeStep} onChange={(e) => setRangeStep(Number(e.target.value))}
+              <label htmlFor="optimize-range-step" className="block text-xs text-slate-400 mb-1">Step</label>
+              <input id="optimize-range-step" type="number" value={rangeStep} onChange={(e) => setRangeStep(Number(e.target.value))}
                 className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm" />
             </div>
           </div>
           <div className="mt-4">
-            <label className="block text-xs text-slate-400 mb-1">Optimize for</label>
-            <select value={metricKey} onChange={(e) => setMetricKey(e.target.value as keyof BacktestMetrics)}
+            <label htmlFor="optimize-metric" className="block text-xs text-slate-400 mb-1">Optimize for</label>
+            <select id="optimize-metric" value={metricKey} onChange={(e) => setMetricKey(e.target.value as keyof BacktestMetrics)}
               className="w-full md:w-64 bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm">
               {METRIC_OPTIONS.map((m) => <option key={m.key} value={m.key}>{m.label}</option>)}
             </select>

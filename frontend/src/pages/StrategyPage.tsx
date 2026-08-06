@@ -97,28 +97,28 @@ export default function StrategyPage() {
         {/* Config row */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
           <div>
-            <label className="block text-xs text-slate-400 mb-1">Ticker</label>
-            <input value={ticker} onChange={(e) => setTicker(e.target.value.toUpperCase())}
+            <label htmlFor="strategy-ticker" className="block text-xs text-slate-400 mb-1">Ticker</label>
+            <input id="strategy-ticker" value={ticker} onChange={(e) => setTicker(e.target.value.toUpperCase())}
               className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm uppercase" />
           </div>
           <div>
-            <label className="block text-xs text-slate-400 mb-1">Start Date</label>
-            <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
+            <label htmlFor="strategy-start-date" className="block text-xs text-slate-400 mb-1">Start Date</label>
+            <input id="strategy-start-date" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
               className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm" />
           </div>
           <div>
-            <label className="block text-xs text-slate-400 mb-1">End Date</label>
-            <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)}
+            <label htmlFor="strategy-end-date" className="block text-xs text-slate-400 mb-1">End Date</label>
+            <input id="strategy-end-date" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)}
               className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm" />
           </div>
           <div>
-            <label className="block text-xs text-slate-400 mb-1">Capital ($)</label>
-            <input type="number" value={capital} onChange={(e) => setCapital(Number(e.target.value))}
+            <label htmlFor="strategy-capital" className="block text-xs text-slate-400 mb-1">Capital ($)</label>
+            <input id="strategy-capital" type="number" value={capital} onChange={(e) => setCapital(Number(e.target.value))}
               className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm" />
           </div>
           <div>
-            <label className="block text-xs text-slate-400 mb-1">Benchmark</label>
-            <input value={benchmark} onChange={(e) => setBenchmark(e.target.value.toUpperCase())}
+            <label htmlFor="strategy-benchmark" className="block text-xs text-slate-400 mb-1">Benchmark</label>
+            <input id="strategy-benchmark" value={benchmark} onChange={(e) => setBenchmark(e.target.value.toUpperCase())}
               className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm uppercase" />
           </div>
           <PositionSizingInput value={positionSizing} onChange={setPositionSizing} />
